@@ -1,0 +1,636 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{minted}
+%\usepackage{hyperref}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 1.\\ \Large Свойства лямбда-исчисления.\end{center}
+\end{frame}
+
+\begin{frame}{Некоторые базовые определения --- повторение}
+\begin{dfn}Пред-лямбда-терм:
+$$\Lambda ::= (\lambda x.\Lambda) | (\Lambda\ \Lambda) | x$$
+\end{dfn}
+\begin{dfn}Лямбда-терм: $\Lambda/(=_\alpha)$
+\end{dfn}
+
+\begin{dfn}$R \subseteq A \times B$ --- бинарное отношение.\\
+Запишем $aRb$, если $\langle a, b \rangle \in R$\\
+Отношение для инфиксной операции $a \star b$: $\langle a,b \rangle \in (\star)$
+\end{dfn}
+\end{frame}
+
+\begin{frame}{$\beta$-редуцируемость}
+\begin{dfn}
+	$(\twoheadrightarrow_\beta)$ --- транзитивное и рефлексивное замыкание отношения $(\rightarrow_\beta)$
+
+	А именно, будем говорить, что $A\twoheadrightarrow_{\beta}B$, если найдутся такие $X_{1}$\ldots $X_{n}$, что $A=_{\alpha}X_{1}\to_{\beta}X_{2}\to_{\beta}\ldots\to_{\beta}X_{n-1}\to_{\beta}X_{n}=_{\alpha}B$.
+\end{dfn}
+
+%$(\twoheadrightarrow_{\beta})$ "--- рефлексивное и транзитивное замыкание $(\to_{\beta})$. $(\twoheadrightarrow_{\beta})$ не обязательно приводит к нормальной форме
+\begin{exm}
+	$\Omega\twoheadrightarrow_{\beta}\Omega$
+\end{exm}
+\end{frame}
+
+\begin{frame}{}
+\begin{dfn}[Ромбовидное свойство]
+	Отношение $R$ обладает ромбовидным свойством, если для любых $a,b,c$:\\
+{\bf из} $aRb$, $aRc$, $b\neq{}c$ {\bf следует} существование $d$, что $bRd$ и $cRd$.
+\end{dfn}
+
+\begin{exm}
+	$(\leq)$ на $\mathbb{N}_0$ обладает ромбовидным свойством: $$d = max(b,c):\quad\quad\quad 1 \leq 2, 1 \leq 3 \Rightarrow d = max(2,3): 2 \leq 3, 3 \leq 3$$
+
+	$(>)$ на $\mathbb{N}_0$ не обладает ромбовидным свойством: $$3 > 1, 3 > 0:\quad\quad\quad \text{нет } d: 1 > d, 0 > d$$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Теорема Чёрча-Россера}
+\begin{thm}[Черча-Россера]
+	$(\twoheadrightarrow_{\beta})$ обладает ромбовидным свойством.
+\end{thm}
+
+
+\begin{cons}
+	Если у $A$ есть нормальная форма, то она единственная.
+\end{cons}
+
+\begin{proof}
+	Пусть $A\twoheadrightarrow_{\beta}B$ и $A\twoheadrightarrow_{\beta}C$. $B$, $C$ "--- нормальные формы и $B\neq_{\alpha}C$. 
+	Тогда по теореме Черча-Россера найдётся $D$: $B\twoheadrightarrow_{\beta}D$ и $C\twoheadrightarrow_{\beta}D$. Тогда $B=_{\alpha}D$ и $C=_{\alpha} D$ $\Rightarrow$ $B=_{\alpha}C$. Противоречие.
+\end{proof}
+
+\begin{lmm}
+	Если $B$ "--- нормальная форма, то не существует $Q$ такой, что $B\to_{\beta}Q$. Значит если $B\twoheadrightarrow_{\beta}Q$, то количество шагов редукции равно 0.
+\end{lmm}
+\end{frame}
+
+\begin{frame}{}
+\begin{lmm}
+	 \label{refl}
+	Если $R$ "--- обладает ромбовидным свойством, то и $R^{*}$ (транзитивное, рефлексивное замыкание $R$) им обладает.
+\end{lmm}
+
+\begin{proof}
+Две вложенных индукции.
+\end{proof}
+\end{frame}
+
+%\begin{proof}
+%    Пусть $M_1 R^{*} M_n$ и $M_1 R N_1$. Тогда существуют такие $M_2 \ldots M_{n-1}$, что $M_1 R M_2$ \ldots $M_{n-1} R M_n$.
+%	Так как $R$ обладает ромбовидным свойством, $M_1 R M_2$ и $M_1 R N_1$, то существует такое $N_2$,
+%	что $N_1 R N_2$ и $M_2 R N_2$. Аналогично, существуют такие $N_3 \ldots N_n$, что $N_{i-1} R N_{i}$ и $M_i R N_i$.
+%	Мы получили такое $N_n$, что $N_1 R^{*} N_n$ и $M_n R^{*} N_n$.
+%	
+%	Пусть теперь $M_{1,1}R^{*}M_{1,n}$ и $M_{1,1}R^{*}M_{m,1}$, то есть имеются $M_{1,2}$\ldots$M_{1,n-1}$ и $M_{2,1}$\ldots$M_{m-1,1}$,
+%	что $M_{1,i-1} R M_{1,i}$ и $M_{i-1, 1} R M_{i, 1}$.
+%	Тогда существует такое $M_{2,n}$, что $M_{2,1} R^{*} M_{2,n}$ и $M_{1,n} R^{*} M_{2,n}$.
+%	Аналогично, существуют такие $M_{3,n}\ldots M_{m,n}$, что $M_{i,1} R^{*} M_{i,n}$ и $M_{1,n} R^{*} M_{i,n}$.
+%	Тогда $M_{1,n} R^{*} M_{m,n}$ и $M_{m,1} R^{*} M_{m,n}$.
+%\end{proof}
+
+\begin{frame}{}
+\begin{lmm}
+	$(\to_{\beta})$ не обладает ромбовидным свойством.
+\end{lmm}
+
+	Пусть $A=(\lambda{}x.x x)(\comb I \comb I)$. Покажем, что в таком случае не будет выполняться ромбовидное свойство:
+	
+	\begin{figure}[ht]
+		\centering
+		\begin{tikzpicture}[->, every edge/.style={draw=black,thick}]
+		\node[label={\scriptsize\tikz\node[circle,draw]{$A$};}]     at (0,   0) (A)  {$(\lambda x . x x)(\comb I \comb I)$};
+		\node[label={135:\scriptsize\tikz\node[circle,draw]{$B$};}] at (-2, -1) (B)  {$(\comb I \comb I)(\comb I \comb I)$};
+		\node[label={45:\scriptsize\tikz\node[circle,draw]{$C$};}]  at (2,  -1) (C)  {$(\lambda x . x x)  \comb I$};
+		\node[label={180:\scriptsize\tikz\node[circle,draw]{$B1$};}]                                                       at (-3, -2) (B1) {$(\comb I \comb I)\comb I$};
+		\node[label={0:\scriptsize\tikz\node[circle,draw]{$B2$};}]                                                       at (-1, -2) (B2) {$\comb I(\comb I \comb I)$};
+		\node[label={0:\scriptsize\tikz\node[circle,draw]{$D$};}]                                                       at (0,  -3) (D)  {$\comb I \comb I$};
+		\path (A)  edge (B)
+		edge (C)
+		(B)  edge (B1)
+		edge (B2)
+		(B1) edge (D)
+		(B2) edge (D)
+		(C)  edge (D);
+		\end{tikzpicture}
+		\caption{Нет такого $D$, что $B \to_{\beta} D$ и $C \to_{\beta} D$.}
+	\end{figure}	
+\end{frame}
+
+\newcommand{\bpar}{\rightrightarrows_{\beta}}
+
+\begin{frame}{}
+\begin{dfn}[Параллельная $\beta$-редукция]
+	$A\bpar B$, если
+	\begin{enumerate}
+		\item $A=B$
+		\item $A=P_{1}\ Q_{1}$, $B=P_{2}\ Q_{2}$ и $P_{1}\bpar P_{2}$, $Q_{1}\bpar Q_{2}$
+		\item $A=\lambda{}x.P_{1}$, $B=\lambda{}x.P_{2}$ и 
+		$P_{1}\bpar P_{2}$
+		\item $A=_{\alpha}(\lambda{}x.P_1)Q_1$, $B=_{\alpha}P_2[x\coloneqq{}Q_2]$, причем $Q_2$ свободна для подстановки вместо $x$ в $P_2$ и $P_1 \bpar P_2$, $Q_1 \bpar Q_2$
+	\end{enumerate}
+\end{dfn}
+\end{frame}
+
+\begin{frame}{Лемма: если $P_{1}\bpar P_{2}$ и $Q_{1}\bpar Q_{2}$, то $P_{1}[x\coloneqq{}Q_{1}]\bpar P_{2}[x\coloneqq{}Q_{2}]$}
+%\begin{proof}[индукция по определению ($\bpar$)]
+	\begin{itemize}
+		\item Пусть $P_{1}=_{\alpha}P_{2}$. Индукция по структуре выражения.
+		\item Пусть $P_{1}\equiv{}A_{1}B_{1}$, $P_{2}\equiv{}A_{2}B_{2}$. По определению $(\bpar)$ $A_{1} \bpar A_{2}$ и $B_{1} \bpar B_{2}$. Тогда:
+		\begin{enumerate}
+			\item $x \in FV(A_{1})$. По индукционному предположению $A_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}[x\coloneqq{}Q_{2}]$. Тогда $A_{1}[x\coloneqq{}Q_{1}]B_{1} \bpar A_{2}[x\coloneqq{}Q_{2}]B_{2}$. Тогда $A_{1}B_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}B_{2}[x\coloneqq{}Q_{2}]$.
+			\item $x \in FV(B_{1})$. По индукционному предположению $B_{1}[x\coloneqq{}Q_{1}] \bpar B_{2}[x\coloneqq{}Q_{2}]$. Тогда $A_{1}B_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}B_{2}[x\coloneqq{}Q_{2}]$.
+		\end{enumerate}
+		\item Пусть $P_{1}\equiv{}\lambda{}y.A_{1}$, $P_{2}\equiv{}\lambda{}y.A_{2}$. По определению $(\bpar)$ $A_{1}\bpar A_{2}$. Тогда по индукционному предположению $A_{1}[x\coloneqq{}Q_{1}] \bpar A_{2}[x\coloneqq{}Q_{2}]$. Тогда 
+		$\lambda{}y.(A_{1}[x\coloneqq{}Q_{1}]) \bpar \lambda{}y.(A_{2}[x\coloneqq{}Q_{2}])$ по определению $(\bpar)$. Следовательно 	$\lambda{}y.A_{1}[x\coloneqq{}Q_{1}] \bpar \lambda{}y.A_{2}[x\coloneqq{}Q_{2}]$ по определению подстановки.
+		\item Пусть $P_{1}=_\alpha(\lambda{}y.A_1)B_1$, $P_{2}=_\alpha A_2[y\coloneqq{}B_2]$ и $ A_1 \bpar A_2 $, $ B_1 \bpar B_2 $. По индукционному предположению получаем, что $A_1[x \coloneqq Q_1] \bpar A_2[x \coloneqq Q_2]$, $B_1[x \coloneqq Q_1] \bpar B_2[x \coloneqq Q_2]$. 
+               По определению $(\bpar)$ тогда $ (\lambda{}y.A_1[x\coloneqq Q_1])B_1[x \coloneqq Q_1] \bpar  A_2[y \coloneqq B_2][x \coloneqq Q_2]$
+	\end{itemize}
+%\end{proof}
+\end{frame}
+
+\begin{frame}{Лемма: $(\bpar)$ обладает ромбовидным свойством}
+
+	Будем доказывать индукцией по определению $(\bpar)$. Покажем, что если $M \bpar M_1$ и $M \bpar M_2$, то существует ${}M_3$, что $M_1 \bpar M_3$ и $M_2 \bpar M_3$. Рассмотрим случаи:
+	\begin{itemize}
+		\item Если $M\equiv M_1$, то просто возьмем $M_3\equiv M_2$.
+		\item Если $M\equiv \lambda{}x.P, M_1 \equiv \lambda{}x.P_1, M_2 \equiv \lambda{}x.P_2$ и $P \bpar P_1, P \bpar P_2$, то по предположению индукции 
+		существует $P_3$, что $P_1 \bpar P_3, P_2 \bpar P_3$, тогда возьмем $M_3\equiv \lambda{}x.P_3$.
+		\item Если $M \equiv P Q, M_1 \equiv P_1 Q_1$ --- естественное доказательство.
+%и по определению $(\bpar)$ $P \bpar P_1, Q \bpar Q_1$, то рассмотрим два случая:
+%		\begin{enumerate}
+%			\item $M_2 \equiv P_2 Q_2$. Тогда по предположению индукции существует $P_3$, что $P_1 \bpar P_3, P_2 \bpar P_3$. Аналогично для $Q$. Тогда возьмем $M_3 \equiv P_3 Q_3$.
+%			\item $P\equiv \lambda {}x.P'$ значит $P_1 \equiv \lambda{}x.P_1'$ и $ P' \bpar P_1'$. Пусть тогда $ M_2 \equiv P_2[x\coloneqq{} Q_2]$, по определению $(\bpar)$ $P' \bpar P_2, Q \bpar Q_2$. Тогда по предположению индукции и лемме $\ref{bparhelp}$ существует $M_3 \equiv P_3[x \coloneqq Q_3]$ такой, что $ P_1' \bpar P_3 $, $ Q_1 \bpar Q_3 $ и $ P_2 \bpar P_3 $, $ Q_2 \bpar Q_3 $.
+%		\end{enumerate}
+	\item Если $ M \equiv (\lambda{}x.P)Q $, $ M_1 \equiv P_1[x\coloneqq Q_1] $ и $ P \bpar P_1 $, $ Q \bpar Q_1$, то рассмотрим случаи:
+	\begin{enumerate}
+		\item $ M_2 \equiv (\lambda{}x.P_2)Q_2 $, $P \bpar P_2$, $Q \bpar Q_2$. Тогда по предположению индукции и лемме существует такой $ M_3 \equiv P_3[x \coloneqq Q_3] $, что $ P_1 \bpar P_3 $, $ Q_1 \bpar Q_3 $ и $ P_2 \bpar P_3 $, $ Q_2 \bpar Q_3 $.
+		\item $ M_2 \equiv P_2[x \coloneqq Q_2]$, $ P \bpar P_2 $, $ Q \bpar Q_2 $. Тогда по предположению индукции и лемме существует такой $ M_3 \equiv P_3[x \coloneqq Q_3] $, что $ P_1 \bpar P_3 $, $ Q_1 \bpar Q_3 $ и $ P_2 \bpar P_3 $, $ Q_2 \bpar Q_3 $.
+	\end{enumerate}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+\begin{lmm}
+	\
+	\begin{enumerate}
+		\item $(\bpar )^{*} \subseteq (\to_{\beta})^{*}$
+		\item $(\to_{\beta})^{*} \subseteq (\bpar )^{*}$
+	\end{enumerate}
+\end{lmm}
+
+\begin{cons}
+	$(\to_{\beta})^{*}=(\bpar )^{*}$
+\end{cons}
+
+Из приведенных выше лемм и следствия докажем теорему Черча-Россера.
+
+\begin{proof}
+	$(\to_{\beta})^{*} = (\twoheadrightarrow_{\beta})$. Тогда $(\twoheadrightarrow_{\beta})=(\bpar )^{*}$. Значит из того, что $(\bpar )$ обладает ромбовидным свойством и леммы $\ref{refl}$, следует, что $(\twoheadrightarrow_{\beta})$ обладает ромбовидным свойством.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Нормальный и аппликативный порядок вычислений}
+
+\begin{exm}
+	Выражение $KI\Omega$ можно редуцировать двумя способами:
+	\begin{enumerate}
+		\item $\comb K \comb I \Omega =_{\alpha} ((\lambda{}a.\lambda{}b.a) \comb I) \Omega \to_{\beta} (\lambda{}b.\comb I)\Omega  \to_{\beta} \comb I$
+		\item  $\comb K \comb I \Omega =_{\alpha} ((\lambda{}a.\lambda{}b.a) \comb I)((\lambda{}x.x \ x) (\lambda{}x.x \ x)) \twoheadrightarrow_{\beta} ((\lambda{}a.\lambda{}b.a) \comb I)((\lambda{}x.x \ x) (\lambda{}x.x \ x)) \to_{\beta} \comb K \comb I \Omega $
+	\end{enumerate}
+\end{exm}
+
+%Как мы видим, в первом случае мы достигли нормальной формы, в то время как во втором мы получили бесконечную редукцию. Разница двух этих способов в порядке редукции. Первый называется нормальный порядок, а второй аппликативный. 
+
+\begin{dfn}[нормальный порядок редукции]
+	Редукция самого левого $\beta$-редекса.
+\end{dfn}
+
+\begin{dfn}[аппликативный порядок редукции]
+	Редукция самого левого $\beta$-редекса из самых вложенных.
+\end{dfn}
+
+\begin{thm}[Приводится без доказательства]
+	Если нормальная форма существует, она может быть достигнута нормальным порядком редукции.
+\end{thm}
+\end{frame}
+
+\begin{frame}[fragile]{Нормальные формы}
+
+\begin{dfn}Редекс --- выражение вида $(\lambda x.P)\ Q$\end{dfn}
+
+\begin{dfn}Выражение в нормальной форме --- выражение без редексов\end{dfn}
+
+\begin{dfn}
+\begin{tabular}{l|ll}
+& Нормальная форма & Заголовочная (Head) Н.Ф.\\\hline
+(обычная) & \begin{minipage}{5cm}\vspace{0.1cm}Нет редексов\\$N\ ::=\ \lambda x.N\ |\ ((x\ N)\ \dots\ N)$\\$a\ (\lambda x.x)\ (\lambda x.x)$\end{minipage} & 
+      \begin{minipage}{5cm}\vspace{0.1cm}Без редексов в <<заголовке>>\\$H\ ::=\ \lambda x.H\ |\ ((x\ \Lambda)\ \dots\ \Lambda)$\\$a\ ((\lambda x.x)\ (\lambda x.x))$\end{minipage} \\\hline
+Слабая (Weak) & \begin{minipage}{5cm}\vspace{0.1cm}Можно в абстракциях\\$W\ ::=\ \lambda x.\Lambda\ |\ ((x\ W)\ \dots W)$\\$\lambda f.(\lambda x.x)\ (\lambda x.x)$\end{minipage} & 
+      \begin{minipage}{5cm}Слабая и заголовочная\\$F\ ::=\ \lambda x.\Lambda\ |\ ((x\ \Lambda)\ \dots\ \Lambda)$\\$\lambda f.a\ ((\lambda x.x)\ (\lambda x.x))$\end{minipage}
+\end{tabular}
+\end{dfn}
+\end{frame}
+
+\begin{frame}[fragile]{Использование СЗНФ}
+Нормальный порядок редукции останавливается в Н.Ф. А если Н.Ф. нет?
+
+\begin{verbatim}let InfList n = n : InfList (n+1)
+InfList 0 = 0 : InfList 1 = ... = 0 : 1 : 2 : InfList 3 = ...\end{verbatim}
+
+Для ленивого языка разумно искать СЗНФ.
+
+Пусть $F := \lambda r.\lambda v.Cons\ v\ (r\ (v+1))$.
+Тогда построим СЗНФ для $Y\ F$:
+
+
+$$(\lambda f.(\lambda x.f\ (x\ x))\ (\lambda x.f (x\ x)))\ F \twoheadrightarrow_\beta \underbrace{(\lambda x.F\ (x\ x))\ (\lambda x.F\ (x\ x))}_{Y_F}$$
+
+И дальше:
+\vspace{-0.3cm}
+$$Y_F \rightarrow_\beta F\ Y_F = \lambda r.\lambda v.Cons\ v\ (r\ (v+1))\ Y_F \twoheadrightarrow_\beta \lambda v.Cons\ v\ (Y_F\ (v+1))$$
+
+Тогда для 0:
+\vspace{-0.3cm}
+$$Y_F\ 0 \twoheadrightarrow_\beta (\lambda v.Cons\ v\ (Y_F\ (v+1)))\ 0 \rightarrow_\beta Cons\ 0\ (Y_F\ (0+1))$$
+%\end{exm}
+
+\begin{comment}
+\begin{dfn}Лямбда-выражение $A$ находится в нормальной форме, если в нём нет редексов\end{dfn}
+Например: $x\ (\lambda f.\lambda x.f\ (f\ x))\ (\lambda f.\lambda x.f\ x)$
+\begin{dfn}Лямбда-выражение $A$ находится в слабой нормальной форме (Weak Normal Form), если в ней нет редексов вне тел лямбда-абстракций\end{dfn}
+Например: $x\ (\lambda x.I\ I)\ (\lambda y.I\ I)$
+\begin{dfn}Лямбда-выражение $A$ находится в слабой заголовочной нормальной форме (Weak Head Normal Form), если оно соответствует одному из следующих шаблонов:
+\begin{itemize}
+\item $x$ (является переменной)
+\item $\lambda x.P$ (является лямбда-абстракцией)
+\item $x\ P_1\ P_2 \dots P_n$ (является применением переменной к произвольным аргументам)
+\end{itemize}\end{dfn}
+Например: $x\ (I\ I)\ (I\ I)$
+\end{comment}
+\end{frame}
+
+\begin{frame}[fragile]{Давайте ещё чуть вглубь: что такое $Cons$?}
+\begin{itemize}
+\item Константа --- переменная, реализация которой указана в контексте. Ну или так: $(\lambda Cons.(\dots))\ (\text{Cons implementation})$
+\item Алгебраический тип для списка: \verb!type list = Nil | Cons a list!
+\item $In_L\ a := \lambda p.\lambda q.p\ a$; $In_R\ b := \lambda p.\lambda q.q\ b$; $Case\ f\ g\ v := v\ f\ g$
+\item $Y_F\ 0\twoheadrightarrow_\beta Cons\ 0\ (Y_F\ (0+1))$, то есть $\lambda p_1.\lambda q_1.q_1\ \langle 0,Y_F\ (0+1)\rangle$
+\item Тогда \verb!dropFirst [] = []; dropFirst (x:xs) = xs! превратится в такое:
+$dropFirst := \lambda l.l\ (\lambda c.[])\ Snd$
+\item $dropFirst\ \lambda p_1.\lambda q_1.q_1\ \langle 0,Y_F\ (0+1)\rangle \twoheadrightarrow_\beta 
+Snd\ \langle 0,Y_F\ (0+1)\rangle\twoheadrightarrow_\beta Y_F\ (0+1)\twoheadrightarrow_\beta Cons\ (0+1)\ (Y_F\ ((0+1)+1))$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Нормальный порядок --- медленный}
+
+\begin{exm}
+	Рассмотрим $\lambda$-выражение $(\lambda{}x.x \ x \ x \ x) (\comb I \comb I)$. Попробуем редуцировать его нормальным порядком:
+	 \[(\lambda{}x.x \ x \ x \ x) (\comb I \comb I) \to_{\beta} (\comb I \comb I)(\comb I \comb I)(\comb I \comb I)(\comb I \comb I) \to_{\beta} \comb I(\comb I \comb I)(\comb I \comb I)(\comb I \comb I) \to_{\beta} (\comb I \comb I)(\comb I \comb I)(\comb I \comb I) \to_{\beta} \ldots \to_{\beta} \comb I\] 
+	Как мы увидим, в данной ситуации аппликативный порядок редукции оказывается значительно эффективней: 
+	\[ (\lambda{}x.x \ x \ x \ x) (\comb I \comb I) \to_{\beta} (\lambda{}x.x \ x \ x \ x) \comb I \to_{\beta} \comb I \comb I \comb I \comb I\to_{\beta} \comb I \comb I \comb I \to_{\beta} \comb I \comb I \to_{\beta} \comb I \]
+\end{exm}
+\end{frame}
+
+\begin{frame}{Просто-типизированное лямбда-исчисление}
+\begin{dfn}[$\lambda_\rightarrow$ по Карри]\vspace{-0.5cm}
+%Просто-типизированное лямбда-исчисление (по Карри). %\pause Типы: $\tau ::= \alpha | (\tau\rightarrow\tau)$. \pause Язык: $\Gamma\vdash A:\varphi$
+$$\infer[x \notin \Gamma]{\Gamma,x:\varphi \vdash x:\varphi}{} \quad\quad 
+  \infer[x \notin \Gamma]{\Gamma\vdash \lambda x.A: \varphi\rightarrow\psi}{\Gamma,x:\varphi\vdash A:\psi} \quad\quad 
+  \infer{\Gamma\vdash B A:\psi}{\Gamma\vdash A:\varphi\quad\quad\Gamma\vdash B:\varphi\rightarrow\psi}$$
+\end{dfn}
+
+\begin{dfn}[$\lambda_\rightarrow$ по Чёрчу]\vspace{-0.5cm}
+$$\infer[x \notin \Gamma]{\Gamma,x:\varphi \vdash x:\varphi}{} \quad\quad 
+  \infer[x \notin \Gamma]{\Gamma\vdash \lambda x^{\color{blue}\varphi}.A: \varphi\rightarrow\psi}{\Gamma,x:\varphi\vdash A:\psi} \quad\quad 
+  \infer{\Gamma\vdash B A:\psi}{\Gamma\vdash A:\varphi\quad\quad\Gamma\vdash B:\varphi\rightarrow\psi}$$
+\end{dfn}\pause
+
+\begin{exm}
+\begin{tabular}{l|l}
+По Карри & По Чёрчу\\\hline
+$\lambda f.\lambda x.f\ (f\ x) : (\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$ & $\lambda f^{\alpha\rightarrow\alpha}.\lambda x^\alpha.f\ (f\ x) : (\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$\\\pause
+$\lambda f.\lambda x.f\ (f\ x) : (\beta\rightarrow\beta)\rightarrow(\beta\rightarrow\beta)$ & $\lambda f^{\beta\rightarrow\beta}.\lambda x^\beta.f\ (f\ x) : (\beta\rightarrow\beta)\rightarrow(\beta\rightarrow\beta)$
+\end{tabular}
+\end{exm}
+
+%Изоморофизм Карри-Ховарда:\\
+%Типизированы по Чёрчу: Си, Паскаль, Джава, ...\\
+%Типизированы по Карри: Окамль, Хаскель, ...
+\end{frame}
+
+\begin{frame}{Теоремы о $\lambda_\rightarrow$}
+
+\begin{lmm}[о редукции, subject reduction]
+Если $A \twoheadrightarrow_\beta B$ и $\vdash A: \tau$, то $\vdash B: \tau$.
+\end{lmm}
+
+\begin{lmm}
+Если $\vdash A : \tau$, то любое подвыражение $A$ также имеет тип.
+\end{lmm}
+
+\begin{thm}[Чёрча-Россера]
+Если $\vdash A:\tau$, $A \twoheadrightarrow_\beta B$, $A \twoheadrightarrow_\beta C$ и $B \ne C$, то найдётся $D$, что 
+$\vdash D :\tau$, и $B \twoheadrightarrow_\beta D$, $C \twoheadrightarrow_\beta D$.
+\end{thm}
+\end{frame}
+
+\begin{frame}{Соответствие между исчислениями}
+\begin{dfn}
+$$|A|=\left\{\begin{array}{ll}x, & A = x\\
+\lambda x.|Q| & A = \lambda x^\tau.Q\\
+|P|\ |Q| & A = P\ Q
+\end{array}\right.$$
+\end{dfn}\vspace{-0.5cm}
+
+\begin{thm}\begin{enumerate}
+\item Если $\Gamma \vdash_\text{ч} A : \tau$, то $|\Gamma| \vdash_\text{к} |A| : \tau$;
+\item Если $\Gamma \vdash_\text{к} A : \tau$, то найдутся такие $B: A = |B|$ и $\Delta: \Gamma=|\Delta|$, что $\Delta \vdash_\text{ч} B : \tau$.
+\end{enumerate}
+\end{thm}
+
+\begin{thm}[уникальность типов, для исчисления по Чёрчу]
+\begin{enumerate}
+\item $\Gamma \vdash_\text{ч} M : \sigma$ и $\Gamma \vdash_\text{ч} M: \tau$ влечёт $\sigma = \tau$;
+\item $\Gamma \vdash_\text{ч} M : \sigma$, $\Gamma \vdash_\text{ч} N : \tau$ и $M =_\beta N$ влечёт $\sigma = \tau$.
+\end{enumerate}
+\end{thm}
+
+\begin{lmm}[о расширении, subject expansion]
+Если $\Gamma \vdash_\text{ч} A : \tau$, $\Gamma\vdash_\text{ч} B : \sigma$ и $B \twoheadrightarrow_\beta A$, то $\Gamma \vdash_\text{ч} B : \tau$.
+%Обратное для исчисления по Карри неверно: $\not\vdash K\ I\ \Omega : \tau$, но $K\ I\ \Omega \twoheadrightarrow_\beta I$ и $I : \alpha\rightarrow\alpha$.
+\end{lmm}
+\end{frame}
+
+\begin{frame}{Изоморфизм Карри-Ховарда}
+\begin{thm}[изоморфизм Карри-Ховарда]
+\begin{enumerate}
+\item Если $\Gamma\vdash\tau$, то найдётся $\Delta$, $A$, что $\Gamma = |\Delta|$ и $\Delta \vdash A : \tau$;
+\item Если $\Gamma \vdash A : \tau$, то $|\Gamma| \vdash \tau$.
+\end{enumerate}
+\end{thm}
+
+\end{frame}
+
+\begin{frame}{}
+\begin{center}\Large Основные задачи типизации $\lambda$-исчисления\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Основные задачи типизации $\lambda$-исчисления}
+
+Рассмотрим $? \vdash ? : ?$.
+
+		\begin{enumerate}
+			\item \emph{Проверка типа:} выполняется ли $\Gamma\vdash M:\sigma$ для контекста $\Gamma\text{, терма }M\text{ и типа }\sigma$\\
+
+{\color{gray}Компиляция в языке программирования, типизированном по Чёрчу. Проверка доказательства.}
+			\item \emph{Реконструкция типа:} $?\vdash M:\:?$.
+
+{\color{gray}Компиляция в языке программирования, типизированном по Карри. Это бывает чаще, чем кажется.}
+
+\verb!template <class A, class B>!\\
+\verb!auto min(A a, B b) -> decltype(a < b ? a : b) {!\\
+\verb!    return (a < b) ? a : b;!\\
+\verb!}!
+
+			\item \emph{Обитаемость типа:} $\Gamma\vdash ?:\sigma$.
+
+{\color{gray}Поиск доказательства.}
+		\end{enumerate}
+Все задачи разрешимы.
+\end{frame}
+
+\begin{frame}{Задача реконструкции типа}
+\begin{dfn}Алгебраический терм $$\theta ::= x\:|\:(f\:\theta\:\ldots\:\theta)$$\end{dfn}\vspace{-0.3cm}
+\begin{dfn}Подстановка переменных --- функция $S_0: V \rightarrow T$, где $S_0(x) = x$ почти везде
+(за исключением конечного множества переменных).
+
+Подстановка: $S: T \rightarrow T$, что $S(x) = S_0(x)$, но $S(f\ \theta_1\ \dots \theta_k) = f\ S(\theta_1)\ \dots\ S(\theta_k)$
+$S(\Gamma) = \{ x : S(\tau_x)\ |\ x : \tau_x \in \Gamma\}$
+\end{dfn}
+
+\begin{dfn}Будем воспринимать запись типа как некоторое выражение в алгебраических термах, импликация --- единственный
+функциональный символ.
+Наиболее общей парой для задачи реконструкции типа $?\vdash M:?$ назовём такие $\langle \Gamma, \gamma \rangle$, что:
+\begin{enumerate}
+\item $\Gamma\vdash M:\gamma$
+\item Если $\Delta\vdash M:\delta$, то найдётся такая подстановка $S$, что $\Delta = S(\Gamma)$ и $\delta = S(\gamma)$.
+\end{enumerate}
+\end{dfn}
+
+\end{frame}
+
+\begin{frame}{Общий план решения}
+\begin{enumerate}
+\item Основа решения --- алгоритм унификации для системы уравнений в алгебраических термах.
+\item По терму $M$ строим систему уравнений в алгебраических термах.
+\item Наиболее общим унификатором системы будет является подстановка, из которой можно получить наиболее общую пару.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Система уравнений в алгебраических термах}
+	\begin{dfn}Система уравнений в алгебраических термах\end{dfn}
+	$$
+		\begin{cases}
+			\theta_1=\sigma_1&\\
+			\vdots&\\
+			\theta_n=\sigma_n&\\
+		\end{cases}
+	$$\par где $\theta_i \text{ и } \sigma_i-\text{термы}$\par
+\end{frame}
+
+\begin{frame}{Задача унификации}
+
+\begin{dfn}Решением задачи унификации для системы уравнений $\sigma_k = \tau_k$ назовём такую подстановку
+$S$, что $S(\sigma_k) = S(\tau_k)$.
+\end{dfn}
+\begin{dfn}Наиболее общим решением задачи унификации назовём такую подстановку $S$, что для любого
+другого решения $T$ найдётся подстановка $R$, что $T(\rho) = R(S(\rho))$.
+\end{dfn}
+\begin{dfn}Система в разрешённой форме --- каждое уравнение имеет вид $x_i = \theta_i$, причём
+каждый из $x_i$ входит в систему ровно один раз (является левой частью одного из уравнений)
+\end{dfn}
+\begin{dfn}Система несовместна --- система не имеет решений.\end{dfn}
+\end{frame}
+
+\begin{frame}{Алгоритм унификации}
+Пусть дана система уравнений $\sigma_i = \tau_i$. 
+Возьмём произвольное уравнение и попробуем проверить/применить одно из следующих условий/действий к нему:
+
+		\begin{enumerate}[(a)]
+		\item $\sigma_i=x$ если $\sigma_i$ не переменная перепишем как $x=\sigma_i$
+		\item $\sigma_i = \sigma_i$ удалим
+		\item $f\:\theta_1\hdots\theta_n=f\:\rho_1\hdots\rho_n$ заменим на $n$ уравнений $\theta_k = \rho_k$
+		\item если уравнение имеет вид $x=\tau_i$ и $x$ входит хотя бы в одно другое уравнение, то заменим все другие уравнения на $\sigma_k[x := \tau_i] = \tau_k[x := \tau_i]$
+		\item если уравнение имеет вид $x = f\ \dots x_i \dots$, система несовместна (occurrs check)
+		\item если уравнение имеет вид $f\ ... = g\ ...$ при $f \ne g$, система несовместна.
+		\end{enumerate}
+
+Если нет ни одного подходящего правила ни для одного уравнения --- закончим работу (система находится в разрешённой форме).
+\end{frame}
+
+\begin{frame}{Алгоритм всегда завершает работу}
+\begin{itemize}
+\item Рассмотрим $\langle x,y,z \rangle$,
+где:
+\begin{itemize}\item $x$ --- количество переменных, входящих в систему, которые входят не в разрешённом виде.
+Переменная $t$ входит в систему в разрешённом виде, если переменная входит в систему ровно один раз, причём входит в уравнение вида $t = \sigma$;
+\item $y$ --- количество функциональных символов в системе;
+\item $z$ --- количество уравнений типа $a=a$ и $\theta=b$, где $\theta$ не переменная.
+\end{itemize}
+\item Упорядочим тройки лексикографически (согласно порядковому типу $\omega^3$).
+
+\item Заметим, что операции $(a)$ и $(b)$ всегда уменьшают $z$ и иногда уменьшают $x$.
+Операция $(c)$ всегда уменьшает $y$, иногда $x$ и, возможно, увеличивает $z$.
+Операция $(d)$ всегда уменьшает $x$ и иногда увеличивает $y$. То есть, операции $(a)-(d)$ всегда уменьшают
+соответствующий ординал.
+
+\item Cогласно лемме из матлога любая строго убывающая последовательность ординалов имеет конечную длину.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Корректность алгоритма}
+\begin{thm}Для системы уравнений $\sigma_k = \tau_k$ алгоритм даёт наиболее общее решение, если оно существует.\end{thm}
+\begin{proof}
+\begin{itemize}
+\item Операции $(a)-(d)$ не меняют множества решений системы. За конечное время либо выполнится условие $(e)$ или $(f)$,
+либо будут исчерпаны правила.
+\item Условия $(e)$, $(f)$ очевидно означают несовместность системы (в т.ч. исходной).
+\item При отсутствии возможности применения правил и условий все уравнения имеют вид $x = \theta_x$,
+где $x$ входит в систему только один раз. Построим $S_0(x) = \theta_x$. 
+
+\item Если есть подстановка $T: T(\sigma_k) = T(\tau_k)$, тогда положим $R = \mathcal{U}(\{ S_0(x) = T_0(x)\ |\ x \ne T_0(x)\})$.
+Очевидно, $T(\zeta) = R(S(\zeta))$
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{comment}
+\begin{frame}{Построение системы по терму $M$}
+Будем строить систему рекурсией по структуре терма $M$ (предполагаем, что все имена
+для связанных переменных уникальны). 
+Каждой переменной $x$ сопоставим свежую типовую переменную $\alpha_x$. Также каждой аппликации $P\ Q$ в терме сопоставим
+свежую типовую переменную $\beta_{PQ}$. 
+
+
+%В итоге получим $\langle \mathcal{E}, \sigma\rangle$, где $\mathcal{E}$ ---
+%система уравнений, а $\sigma$ --- тип терма $M$. 
+По терму $M$ и по всем его подтермам рекурсивно построим пару $\langle \mathcal{E}_M, \sigma_M\rangle$ так:
+
+%Учитывайте недостаток записи: здесь две разные переменные $\beta_{xx}$: $(x\ x)\ (x\ x)$
+
+$$\langle\mathcal{E}_M,\sigma_M\rangle := \left\{\begin{array}{ll}\langle \varnothing, \alpha_x\rangle, & M = x\\
+\langle \mathcal{E}_P, \alpha_x\rightarrow\sigma_P\rangle, & M = \lambda x.P\\
+\langle \mathcal{E}_P\cup\mathcal{E}_Q\cup\{\sigma_P = \sigma_Q\rightarrow\beta_{PQ}\}, \beta_{PQ}\rangle, 
+   & M = P\ Q
+\end{array}\right.$$
+
+\begin{thm} Если $S = \mathcal{U}(\mathcal{E}_M)$, то наиболее общим решением задачи типизации будет
+$\langle\{ x : S(\alpha_x)\ |\ x \in FV(M) \}, S(\sigma_M)\rangle$\end{thm}
+\begin{proof} Индукция по структуре $M$. \end{proof}
+\end{frame}
+
+\begin{frame}{Пример вывода типов }
+\begin{enumerate}
+\item Выберем пример ($M = \lambda f.\lambda x.f\ (f\ x)$) и индуктивно составим систему:
+\begin{itemize}
+\item Для $f\ x$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}\},\; \beta_{fx}\rangle$
+\item Для $f\ (f\ x)$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}\}, \beta_{ffx}\rangle$
+\item Для $\lambda x.f\ (f\ x)$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}\}, \alpha_x\rightarrow\beta_{ffx}\rangle$
+\item Для $\lambda f.\lambda x.f\ (f\ x)$:\quad $\langle\{\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}\}, \alpha_f\rightarrow\alpha_x\rightarrow\beta_{ffx}\rangle$
+\end{itemize}
+\item Приводим систему к разрешённой форме:
+\begin{itemize}
+\item $\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_f = \beta_{fx}\rightarrow\beta_{ffx}$
+\item $\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_x\rightarrow\beta_{fx} = \beta_{fx}\rightarrow\beta_{ffx}$, правило $(d)$
+\item $\alpha_f = \alpha_x\rightarrow\beta_{fx}, \alpha_x = \beta_{fx}, \beta_{fx} = \beta_{ffx}$, правило $(c)$
+\item $\alpha_f = \beta_{fx}\rightarrow\beta_{fx}, \alpha_x = \beta_{fx}, \beta_{fx} = \beta_{ffx}$, правило $(d)$
+\item $\alpha_f = \beta_{ffx}\rightarrow\beta_{ffx}, \alpha_x = \beta_{ffx}, \beta_{fx} = \beta_{ffx}$, правило $(d)$
+\end{itemize}
+\item Строим функцию подстановки:
+$S_0(\alpha_f) = \beta_{ffx}\rightarrow\beta_{ffx}, S_0(\alpha_x) = S_0(\beta_{fx}) = \beta_{ffx}$
+\item Наиболее общая пара:
+$\langle \varnothing, S(\alpha_f\rightarrow\alpha_x\rightarrow\beta_{ffx})\rangle$, то есть
+$$\vdash \lambda f.\lambda x.f\ (f\ x) : (\beta_{ffx}\rightarrow\beta_{ffx})\rightarrow\beta_{ffx}\rightarrow\beta_{ffx}$$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Проверка типа}
+\begin{enumerate}
+\item Задача реконструкции типа находит наиболее общую типизацию.
+\item Сведём задачу проверки $\Gamma\vdash M:\sigma$ к задаче реконструкции типа $?\vdash M:?$ и найдём $\langle \Gamma', \sigma' \rangle$.
+\item Проверим, является ли $\langle \Gamma, \sigma\rangle$ частным случаем $\langle \Gamma', \sigma' \rangle$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Обитаемость типа}
+\begin{enumerate}
+\item Задача поиска $M$, что $\Gamma\vdash M:\sigma$.
+\item Эквивалентно поиску доказательства утверждения $\sigma$ в ИИП (разрешимо).
+\item По доказательству затем получим его краткую запись в виде терма.
+\end{enumerate}
+\end{frame}
+
+%\begin{frame}{Выразительная сила}
+%\begin{dfn}
+%Расширенный полином, где $P(x)$, $P(x,y)$ --- полиномы (выражения, составленные из сложения, умножения, аргументов и натуральных констант),
+%$c$ --- константа:
+%$$E(m,n) := \left\{\begin{array}{ll}
+%c,& m = 0, n = 0\\
+%P_1(m), & n=0\\
+%P_2(n), & m=0\\
+%P_3(m,n), & m>0, n>0
+%\end{array}\right.$$
+\end{comment}
+
+\end{document}
