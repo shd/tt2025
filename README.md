@@ -1,8 +1,8 @@
-Курс теории типов, КТ, весна 2024
+Курс теории типов, КТ, весна 2025
 =================================
 ## Материалы
 + [конспект лекций] (https://github.com/shd/tt2018-conspect)
-+ [теоретические домашние задания] (https://github.com/shd/tt2024/blob/master/hw-theory.pdf)
++ [теоретические домашние задания] (https://github.com/shd/tt2025/blob/master/hw-theory.pdf)
 + [материал для первой половины курса] Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
 https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 
