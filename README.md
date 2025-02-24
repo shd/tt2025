@@ -28,3 +28,14 @@ https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 ### Где почитать
 + Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
 https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
+
+## Лекция 2
+### Теоремы о просто типизированном лямбда исчислении
++ Вывод типа в просто типизированном лямбда-исчислении
++ Выразительная сила просто типизированного лямбда-исчисления
++ Невыразимость связок ИИВ через друг друга
++ Сильная и слабая нормализуемость
++ Теорема о сильной нормализуемости исчисления
+### Где почитать
++ Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
+https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
