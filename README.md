@@ -39,3 +39,22 @@ https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 ### Где почитать
 + Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
 https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
+
+## Лекция 3
+### Исчисление предикатов второго порядка, система F, типовая система Хиндли-Милнера
++ Исчисление предикатов второго порядка и система F, введение
++ Выразимость всех связок через кванторы существования и импликацию
++ Правила для кванторов существования
++ Экзистенциальные типы
++ Ранг типа
++ Типовая система Хиндли-Милнера
+### Где почитать
++ Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
+https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
++ John C. Mitchell, Gordon D. Plotkin, Abstract Types Have Existential Type
+http://homepages.inf.ed.ac.uk/gdp/publications/Abstract_existential.pdf
++ Luis Damas and Robin Milner, Principal type-schemes for functional programs
+POPL'82: Proceedings of the 9th ACM SIGPLAN-SIGACT symposium on Principles of programming languages, ACM, pp. 207–212
++ Robin Milner, A theory of type polymorphism in programming (1978) // Journal of Computer and System Sciences, 1978, vol. 17, pp. 348--375
+https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.5276
++ Бенджамин Пирс, Типы в языках программирования. Издательство «Лямбда пресс» & «Добросвет», Москва, 2011
