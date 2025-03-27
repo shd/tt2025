@@ -1,0 +1,490 @@
+\documentclass[aspectratio=169]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{color}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\bf{\textrm{#1}}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}\Large Лекция 4.\\ Типовая система Хиндли-Милнера \\ Обобщённая типовая система, лямбда-куб\end{center}
+\end{frame}
+
+
+\begin{frame}{Ранг типа}
+Напомним, что $\exists\alpha.\varphi := \forall \beta.(\forall\alpha.\varphi\rightarrow\beta)\rightarrow\beta$.
+\begin{dfn}Функция <<ранг типа>> $rk \subseteq T \times \mathbb{N}_0$. $rk(\sigma) = [mrk(\sigma),+\infty)\cap\mathbb{N}_0$, где $mrk$:
+%Зададим как функцию $rk: \tau \rightarrow \mathcal{P}(\mathbb{N}_0)$:
+%$$rk(\tau) = \left\{\begin{array}{ll}
+%\mathbb{N}_0 & \tau\text{ без кванторов}\\
+%rk(\sigma) \setminus \{0\} & \tau = \forall x.\sigma\\
+%\{ r + 1\ |\ r \in rk(\sigma_1)\} \cap rk(\sigma_2) & \tau = \sigma_1\rightarrow\sigma_2 
+%\end{array}\right.$$
+
+$$mrk(\tau)=\left\{\begin{array}{ll}
+0, &\tau \text{ без кванторов}\\
+\max(mrk(\sigma),1), &\tau = \forall x.\sigma\\
+\max(mrk(\sigma_1)+1,mrk(\sigma_2)), & \tau = \sigma_1\rightarrow\sigma_2, \tau\text{ имеет кванторы}
+\end{array}\right.
+$$
+\end{dfn}\vspace{-0.5cm}
+
+\begin{lmm}
+%\begin{enumerate}
+%\item Если $rk(\tau,r)$, то $rk(\tau,s)$ для всех $s > r$;
+Если $rk(\sigma,1)$, то для формулы $\sigma$ найдётся эквивалентная формула с поверхностными кванторами.
+%\end{enumerate}
+\end{lmm}
+
+\begin{exm}
+$0 \notin rk(\forall\alpha.\gamma\rightarrow\beta)$; $1 \notin rk((\forall\alpha.\gamma\rightarrow\beta)\rightarrow f)=\{2,3,\dots\}$\\
+$1 \notin rk(\exists\alpha.\gamma) = rk(\forall\beta.(\forall\alpha.\gamma\rightarrow\beta)\rightarrow\beta) = \{2,3,\dots\}$\\
+$1 \in rk(\forall\alpha.\delta\rightarrow\forall\beta.\delta\rightarrow\forall\gamma.\delta)$
+%$(\forall x.\alpha)\rightarrow(\forall x.\beta)$ не имеет эквивалентной формулы с поверхностными кванторами.
+\end{exm}
+
+% $$rk(\tau)$$\end{dfn}
+\end{frame}
+
+\begin{frame}{Типовая система Хиндли-Милнера: язык}
+\begin{dfn}Тип $(\tau)$ и типовая схема: $$\tau ::= \alpha\ |\ (\tau\rightarrow\tau)\quad\quad\sigma ::= \forall x.\sigma\ |\ \tau$$%\end{dfn}
+%\begin{dfn}
+Пред-лямбда-терм (типизация по Карри) $$H ::= x\ |\ (H\ H)\ |\ (\lambda x.H)\ |\ (\texttt{let }x=H\texttt{ in }H)$$%\end{dfn}
+%\begin{dfn}
+Редукция для let:
+$$\texttt{let }x=E_1\texttt{ in }E_2\rightarrow_\beta E_2[x := E_1]$$
+\end{dfn}
+
+\begin{exm}
+$$\texttt{let }Inc=\lambda n.\lambda f.\lambda x.n\ f\ (f\ x)\texttt{ in }Inc(Inc\ \overline{0})\twoheadrightarrow_\beta \overline{2}$$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Типовая система Хиндли-Милнера: специализация}
+\begin{dfn}
+
+Пусть $\sigma_1 = \forall \alpha_1. \forall \alpha_2. \dots \forall \alpha_n. \tau_1$.
+Тогда $\sigma_2$ --- частный случай или специализация $\sigma_1$ (обознается как $\sigma_1 \sqsubseteq \sigma_2$), если
+
+$$\sigma_2 =  \forall \beta_1. \forall \beta_2. \dots \forall \beta_m. \tau_1[\alpha_1 := S(\alpha_1),\dots,\alpha_n := S(\alpha_n)]
+\text{ и } \beta_i \notin FV(\forall \alpha_1.\forall\alpha_2.\dots\forall\alpha_n.\tau_1)$$
+
+\end{dfn}
+
+\begin{exm}\
+
+$\forall \alpha.\alpha \rightarrow \alpha
+\sqsubseteq
+\forall \beta_1.\forall \beta_2.(\beta_1 \rightarrow \beta_2) \rightarrow (\beta_1 \rightarrow \beta_2)$
+\end{exm}
+\end{frame}
+
+\begin{frame}{Типовая система Хиндли-Милнера: правила вывода}\vspace{-0.7cm}
+    $$\infer[x \not \in FV(\Gamma)]{\Gamma, x : \sigma \vdash x : \sigma}{}\qquad
+    \infer{\Gamma \vdash E_0\ E_1 : \tau'}{\Gamma \vdash E_0 : \tau \rightarrow \tau' \qquad \Gamma \vdash E_1 : \tau}\qquad
+    \infer{\Gamma \vdash \lambda x.E : \tau \rightarrow \tau'}{\Gamma, x : \tau \vdash E : \tau'}$$
+    $$\infer{\Gamma \vdash let\ x = E_0\ in\ E_1 : \tau}{\Gamma \vdash E_0 : \sigma \qquad \Gamma, x : \sigma \vdash E_1 : \tau}\qquad
+    \infer[\sigma' \sqsubseteq \sigma]{\Gamma \vdash E : \sigma}{\Gamma \vdash E : \sigma'}\qquad
+    \infer[\alpha \not \in FV(\Gamma)]{\Gamma \vdash E : \forall \alpha.\sigma}{\Gamma \vdash E : \sigma}$$
+
+%$$let\ x = a\ in\ b =_\beta (\lambda x.b)\ a$$
+
+\vspace{-0.1cm}
+\begin{exm}
+\end{exm}\vspace{-0.8cm}
+$$
+\infer{\vdash\lambda x.x:\forall\alpha.\alpha\rightarrow\alpha}{\infer{\vdash\lambda x.x:\alpha\rightarrow\alpha}{\infer{x:\alpha\vdash x:\alpha}{}}}
+$$
+\vspace{-0.3cm}
+$$\infer{\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash\texttt{id}\ 0:\texttt{int}}
+        {\infer[S(\alpha)=\texttt{int}]{\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash\texttt{id}:\texttt{int}\rightarrow\texttt{int}}
+               {\infer{\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash\texttt{id}:\forall\alpha.\alpha\rightarrow\alpha}{}}\qquad
+         \texttt{id}:\forall\alpha.\alpha\rightarrow\alpha\vdash 0:\texttt{int}}
+$$
+
+
+Отсюда: $\texttt{let id=}\lambda x.x\text{ in }\langle \texttt{id }0,\texttt{id <<a>>}\rangle:\texttt{int}\&\texttt{string}$
+
+\end{frame}
+
+\begin{frame}{Алгоритм реконструкции типа W}
+На вход подаются $\Gamma,\ M$, на выходе наиболее общая пара: $\langle S, \tau \rangle = W(\Gamma,M)$
+\begin{enumerate}
+    \item $M = x ,\ x:\tau  \in \Gamma$ (иначе ошибка)
+    \begin{itemize}
+        \item $\tau'$ --- $\tau$ без кванторов, все свободные переменные переименованы в свежие.
+        %Например: $\forall \alpha_1.\phi \Rightarrow \phi[\alpha_1 := \beta_1]$, где $\beta_1$ --- свежая переменная
+    \end{itemize}
+    возвращаем $\langle\emptyset, \tau'\rangle$; например, $W(\{x:\forall \alpha.\varphi, y:\beta\}, x) = \langle\emptyset,\varphi[\alpha:=\gamma]\rangle$
+    \item $M = \lambda n.E$
+    \begin{itemize}
+        \item $\Gamma' = \{x : \sigma\ |\ x:\sigma \in \Gamma, x \ne n\} \cup \{n : \alpha\}$, $\alpha$ --- свежая типовая переменная
+        \item $\langle S,\ \tau \rangle = W(\Gamma', E)$
+    \end{itemize}
+    возвращаем $\langle S, S(\alpha) \rightarrow \tau\rangle$
+    \item $M = P\ Q$
+    \begin{itemize}
+        \item $\langle S_1, \tau_1 \rangle = W(\Gamma, P)$; $\langle S_2, \tau_2 \rangle = W(S_1(\Gamma), Q)$
+        \item $S_3 = \mathcal{U}\big[S_2(\tau_1), \tau_2 \rightarrow \alpha\big]$, $\alpha$ --- свежая
+    \end{itemize}
+    возвращаем $\langle S_3 \circ S_2 \circ S_1, S_3(\alpha) \rangle$
+    \item $M = (let\ n = P\ in\ Q)$
+    \begin{itemize}
+        \item $\langle S_1, \tau_1\rangle = W(\Gamma, P)$
+        \item $\Gamma' = \{x:\sigma\ |\ x:\sigma\in\Gamma,x \ne n\} \cup \{ n : \forall \alpha_1 \dots \alpha_k. \tau_1 \}$, где $\alpha_1 \dots \alpha_k$ --- все свободные переменные $\tau_1$
+        \item $\langle S_2, \tau_2\rangle = W(S_1(\Gamma'), Q)$
+    \end{itemize}
+    возвращаем $\langle S_2 \circ S_1, \tau_2 \rangle$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Рекурсия в HM: делаем HM тьюринг-полной}
+
+\begin{enumerate}
+\item Рекурсия для термов. $Y$-комбинатор. Добавим специальное правило вывода:
+
+$$\infer{Y : \forall \alpha.(\alpha\rightarrow\alpha)\rightarrow\alpha}{}$$
+
+\item Рекурсия для типов. Рассмотрим список
+
+\vspace{-0.2cm}
+$$\texttt{Nil} = In_L\ 0\qquad \texttt{Cons}\ e\ l = In_R \langle e,l \rangle\qquad \texttt{List} :\ ?$$
+
+Заметим, что при попытке выписать уравнение для типа мы получим рекурсию:
+
+\vspace{-0.5cm}
+$$\tau = \texttt{Int} \vee \langle \texttt{Int}, \tau \rangle$$
+
+Рекурсивный тип надо добавить явно: $$\tau = \mu \alpha.\texttt{Int}\vee\langle\texttt{Int},\alpha\rangle$$
+Мю-оператор --- это Y-комбинатор для типов. Как его добавить в типовую систему?
+
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Эквирекурсивные и изорекурсивные типы: $\mu\alpha.\sigma(\alpha)$}
+\begin{itemize}
+\item Мю-оператор (неподвижная точка для типов): $\mu\alpha.\sigma(\alpha)$ --- такой $\tau$, что $\tau \approx \sigma(\tau)$.
+\item Эквирекурсивные типы. Считаем, что $\alpha = \sigma(\alpha)$.
+Например, в Java:
+\begin{verbatim}
+public abstract class Enum<E extends Enum<E>>
+        implements Constable, Comparable<E>, Serializable 
+{ ... }
+\end{verbatim}
+
+Уравнение (частный случай): $E = Enum(E)$, или $E = \mu \varepsilon . Enum(\varepsilon)$.
+
+\item Изорекурсивные типы. $\alpha \ne \sigma(\alpha)$, но есть изоморфизм:
+ $$\texttt{roll}: \sigma(\alpha)\rightarrow\alpha\quad\quad\texttt{unroll}: \alpha\rightarrow\sigma(\alpha)$$
+
+Например, для \verb!struct List { List* next; int value; }!:
+
+\begin{center}\begin{tabular}{lll}
+Комп. & В C++ & Пример \\\hline
+\verb!roll! & взятие ссылки & \small\verb!List a; a.next = NULL; return len(!\color{blue}\verb!&a!\color{black}\verb!)!\\
+\verb!unroll! & разыменование & \small\verb!len (List* a) { return (!\color{blue}\verb!*a!\color{black}\verb!).next ? ... : 0 }!
+\end{tabular}\end{center}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Разрешимость задачи реконструкции типа в разных вариантах $F$}
+\begin{tabular}{lll}
+Ранг типов & Собственное название & Разрешимость\\\hline
+0 & $\lambda_\rightarrow$ & разрешимо (лекция 2)\\
+1 & $HM$ & разрешимо (алгоритм $W$)\\
+2 & & разрешимо\\
+$\ge3$ & & неразрешимо
+\end{tabular}
+\end{frame}
+
+%\begin{frame}{}
+%\begin{center}\Large Лекция 5.\\ \Large Обобщённая типовая система, лямбда-куб\end{center}
+%\end{frame}
+
+\begin{frame}[fragile]{Генерики, зависимые типы}
+
+%Рассмотрим код:
+
+\begin{verbatim}
+template <class X>
+class Z {
+    X field;
+}
+\end{verbatim}
+
+Что такое $Z$? Это функция, возвращающая тип по другому типу (генерик). %$Z : \star\rightarrow\star$
+
+\begin{verbatim}
+int main() {
+    unsigned sz;
+    std::cin >> sz;
+    int temp_array [sz];
+    std::cout << sizeof(temp_array);
+    return 0;
+}
+\end{verbatim}
+
+Что такое конструкция \verb!int[sz]!? Это функция, возвращающая тип по значению (зависимый тип).
+
+\end{frame}
+
+\begin{frame}{Терминология: типы, рода, сорта}
+
+Мы будем рассматривать конструкции следующих сортов:
+\vspace{0.3cm}\begin{tabular}{lll}
+Название сорта & Примеры сортов & Примеры конструкций, имеющих сорт\\\hline
+Тип & $\alpha$, $\alpha\rightarrow\beta$, $\star\rightarrow\alpha$ & $3:\texttt{int}, \texttt{id}: \forall\alpha.\alpha\rightarrow\alpha$\\
+Род (kind) & $\star$, $\star\rightarrow\star$, $\alpha\rightarrow\star$ & $\texttt{list}: \star\rightarrow\star$\\
+Сорт & $\openbox$ & $\star\rightarrow\star : \openbox$
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{Язык обобщённой типовой системы}
+
+Откажемся от различных пространств имён для значений, типов и прочего, 
+а также от синтаксического их разделения. Все переменные для значений
+любого сорта, все лямбда-выражения для любых функций --- всё записывается
+единообразно.
+
+\begin{dfn}[cинтаксис выражений]
+Константы сортов: $c ::= \{\star,\openbox\}$
+
+Выражение:
+$$T ::= x \mid c \mid T\ T \mid \lambda x^T.\ T \mid \Pi x^T.\ T$$\vspace{-0.5cm}
+
+Сокращения:
+$$A \rightarrow B ::= \Pi x^A.B,\quad x \notin FV(B)$$
+$$\forall x.P ::= \Pi x^\star.P\quad\Lambda x.\sigma ::= \lambda x^\star.\sigma$$
+
+Метапеременные термов: $A,B,C,\dots,\quad \rho,\sigma,\tau,\dots$. \\
+Метапеременные переменных: $x,y,z$
+\end{dfn}
+
+
+\end{frame}
+
+\begin{frame}{Что такое $\Pi$}
+
+Неформально: $\Pi$ --- аналог лямбда-выражения для типизации конструкции: $$\lambda x^\tau.P : \Pi x^\tau.\pi$$
+
+Вспомним сокращения:
+$$A \rightarrow B ::= \Pi x^A.B,\ x \notin FV(B)\qquad\forall x.P ::= \Pi x^\star.P$$
+
+И рассмотрим map:
+$$\texttt{map} : \forall a.\forall b.(a \rightarrow b) \rightarrow [a]  \rightarrow[b]$$
+
+Перепишем:
+$$\texttt{map} : \Pi a^\star.\Pi b^\star.(\Pi f^{\Pi x^a.b}.\Pi l^{[a]}.[b])$$
+
+Заметим, что операция $[\sigma]$ строит из $\sigma$ другой тип, то есть
+$[\sigma] = (\lambda x^\star.\langle\text{тип реализации списка из }x\rangle) \sigma$, можем раскрыть дальше:
+$$\texttt{map} : \Pi a^\star.\Pi b^\star.(\Pi f^{\Pi x^a.b}.\Pi l^{(\lambda x^\star\dots) a}.(\lambda x^\star\dots)b)$$
+
+Заметим, что $\lambda \sigma^\star.[\sigma] : \star\rightarrow\star$
+
+\end{frame}
+
+\begin{frame}{Обобщённая типовая система: семейство систем}
+
+Семейство параметризовано множеством пар $\mathcal{S}\subseteq\{\star,\openbox\}\times\{\star,\openbox\}$\\
+Аксиома:
+    $$\infer{\vdash \star : \openbox}{}$$
+
+Общие правила вывода: $\sigma \in \{\star,\openbox\}$
+    $$\infer[x \not \in \Gamma]{\Gamma, x : A \vdash x : A}{\Gamma \vdash A:\sigma}\quad\quad\infer{\Gamma, x : C \vdash A:B}{\Gamma \vdash A:B \qquad \Gamma \vdash C:\sigma}$$
+    $$\infer{\Gamma \vdash A:B'}{\Gamma \vdash A:B \qquad \Gamma \vdash B':\sigma \qquad B =_\beta B'}\quad\quad\infer{\Gamma \vdash (F\ H) : B[x := H]}{\Gamma \vdash F : (\Pi x^A.B) \qquad \Gamma \vdash H : A}$$
+
+Частные правила: $\langle \sigma_1, \sigma_2 \rangle \in \mathcal{S}$
+
+    $$\infer[\Pi\text{-правило}]{\Gamma \vdash (\Pi x^A.B) : \sigma_2}{\Gamma \vdash A : \sigma_1 \qquad \Gamma, x : A \vdash B : \sigma_2}$$
+    $$\infer[\lambda\text{-правило}]{\Gamma \vdash (\lambda x^A . P) : (\Pi x^A. B)}{\Gamma \vdash A:\sigma_1 \qquad \Gamma, x : A \vdash P : B \qquad \Gamma, x : A \vdash B : \sigma_2}$$
+
+\end{frame}
+
+\begin{frame}{Типизация $\Lambda \alpha.\lambda x^\alpha.x$}
+Выражение $\Lambda \alpha.\lambda x^\alpha.x$ перепишется как $\lambda \alpha^\star.\lambda x^\alpha.x$, ожидаем тип
+$\Pi \alpha^\star.\Pi x^\alpha.\alpha$.
+
+Потребуются частные правила для $\langle\star,\star\rangle$ и $\langle\openbox,\star\rangle$.
+    $$\infer{\Gamma \vdash (\Pi x^A.B) : \sigma_2}{\Gamma \vdash A : \sigma_1 \qquad \Gamma, x : A \vdash B : \sigma_2}\quad
+      \infer{\Gamma \vdash (\lambda x^A . P) : (\Pi x^A. B)}{\Gamma \vdash A:\sigma_1 \qquad \Gamma, x : A \vdash P : B \qquad \Gamma, x : A \vdash B : \sigma_2}$$
+
+\small
+$$\infer[\langle\openbox,\star\rangle]{\vdash\lambda a^\star.\lambda x^a.x : \Pi a^\star.\Pi x^a.a}{
+   \infer{\vdash \star : \openbox}{} \quad \infer[\langle\star,\star\rangle]{a : \star\vdash\lambda x^a.x : \Pi x^a.a}{\infer{a:\star\vdash a:\star}{}\quad \infer{a:\star,x:a\vdash x:a}{} \quad \infer{a:\star,x:a\vdash a:\star}{}} \quad 
+   \infer{a : \star\vdash\Pi x^a.a:\star}{\infer{}{}\quad\infer{a : \star, x : a\vdash a : \star}{}}
+}$$
+\end{frame}
+
+\begin{frame}{Общие свойства обобщённой системы типов}
+\begin{thm}Для обобщённой системы типов выполнена теорема Чёрча-Россера\end{thm}
+\begin{thm}Обобщённая система типов сильно нормализуема\end{thm}
+\end{frame}
+
+\begin{frame}{Лямбда-куб Барендрегта}
+\begin{center}
+    {\includegraphics[scale=0.3]{lection-04-cube.png}}
+\end{center}
+Типовые системы и языки программирования:
+
+Классические и функциональные языки:
+\begin{tabular}{lll}
+$\lambda_\rightarrow$ & $\{\langle \star,\star \rangle\}$ & Классический Паскаль\\
+$\lambda_{\underline{\omega}}$&$\{\langle \star,\star \rangle, \langle \openbox,\star\rangle\}$ & Система F\\
+$\lambda_\omega$&$\{\langle \star,\star \rangle, \langle \openbox,\star\rangle, \langle \openbox,\openbox\rangle\}$ & Haskell, Ocaml
+\end{tabular}
+
+\vspace{0.3cm}
+Языки с зависимыми типами данных (обычно около $\lambda C$):\\
+Idris, Coq, Agda, Arend, C++ :).
+\end{frame}
+
+\begin{frame}{Изоморфизм Карри-Ховарда}
+
+Рассмотрим формулу с квантором: $\forall x.\pi$.
+Ей соответствует $\Pi x.\pi$, а доказательство было бы $\lambda x.P : \Pi x.\pi$. Подробнее:
+
+\begin{center}\begin{tabular}{ll}
+$\lambda x^\star.P : \Pi x^\star.\pi : \star$ & $x \in V$, для логики 2 порядка\\
+$\lambda x^\upsilon.P : \Pi x^\upsilon.\pi : \star,\text{ если }\upsilon:\star$ & $x \in U\subseteq D$, для (многосортной) логики 1 порядка
+\end{tabular}\end{center}
+
+В самом деле: $\forall x.\pi$ требует $\pi[x := \theta]$ при всех $\theta$ (соответствующих $\upsilon$). 
+Доказательство: функция $\lambda x.P$, отображающая $\theta$ в терм, обитающий в $\Pi x.\pi$.
+
+%Рассмотрим другие конструкции:
+
+\begin{center}\begin{tabular}{lll}
+Логика & $\lambda$-исчисление & Комментарий \\\hline
+$\pi$ & $x : \pi$ & Утверждение\\
+$\pi(x)$ & $P : \pi(x)$ & Предикат\\
+$\forall x\in U.\pi$ & $\lambda x^\upsilon.P : \Pi x^\upsilon.\pi$ & Тотальная функция\\
+$\exists x\in U.\varepsilon$ & $ (X, U[x:=X]) : \Sigma x^\upsilon.\varepsilon$ & Зависимая пара
+\end{tabular}\end{center}
+
+\end{frame}
+
+\begin{comment}
+\vspace{0.5cm}
+\begin{exm}
+type 
+\end{exm}
+
+\begin{exm}
+Покажем, что если $\forall x^\upsilon.\pi(x)$ и $\forall x^\upsilon.\xi(x)$, то 
+
+Пусть $\lambda x^\upsilon.P(x) : \Pi x.\pi(x)$ и $\lambda x^\upsilon.Q(x) : \Pi x^\upsilon.\xi(x)$. Покажем, что 
+$\forall x.\pi(x) \& \xi(x)$.
+То есть, $\lambda x^\upsilon.\langle P(x), Q(x) \rangle$
+\end{exm}
+\end{comment}
+
+\begin{frame}[fragile]{Idris: пример языка с зависимыми типами}
+\small
+\begin{verbatim}
+data Nat : Type where
+    Z : Nat
+    S : Nat -> Nat
+
+data Vect : Nat -> Type -> Type where
+   Nil  : Vect Z a
+   (::) : a -> Vect k a -> Vect (S k) a
+
+(++) : Vect n a -> Vect m a -> Vect (n + m) a
+(++) Nil       ys = ys
+(++) (x :: xs) ys = x :: xs ++ ys
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Зависимые типы: printf на Идрис}
+\small
+\begin{verbatim}
+-- Mukesh Tiwari, https://github.com/mukeshtiwari/Idris/blob/master/Printf.idr
+data Format = FInt Format
+            | FString Format
+            | FOther Char Format
+            | FEnd
+
+format : List Char -> Format
+format ('%' :: 'd' :: cs ) = FInt ( format cs )
+format ('%' :: 's' :: cs ) = FString ( format cs )
+format ( c :: cs )         = FOther c ( format cs )
+format []                  = FEnd
+
+interpFormat : Format -> Type
+interpFormat ( FInt f )     = Int -> interpFormat f
+interpFormat ( FString f )  = String -> interpFormat f
+interpFormat ( FOther _ f ) = interpFormat f
+interpFormat FEnd           = String
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Printf на Идрис}
+\small
+\begin{verbatim}
+formatString : String -> Format
+formatString s = format ( unpack s )
+
+toFunction : ( fmt : Format ) -> String -> interpFormat fmt
+toFunction ( FInt f ) a     = \i => toFunction f ( a ++ show i )
+toFunction ( FString f ) a  = \s => toFunction f ( a ++ s )
+toFunction ( FOther c f ) a = toFunction f ( a ++ singleton c )
+toFunction FEnd a           = a 
+
+sprintf : ( s : String ) -> interpFormat ( formatString s )
+sprintf s = toFunction ( formatString s ) ""
+
+main : IO ()
+main = putStrLn (sprintf "String: %s, integer: %d" "alpha" (10+23))
+\end{verbatim}
+\end{frame}
+
+
+\end{document}
