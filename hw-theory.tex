@@ -455,4 +455,180 @@ struct NonZero { const static std::enable_if_t<x != T(0), T> value = x; };
 \end{enumerate}
 \end{enumerate}
 
+\section*{Домашнее задание №5: Ещё доказательства, иерархии универсумов}
+\begin{enumerate}
+\item Рассмотрим следующее доказательство уникальности элементов списка:
+\begin{verbatim}
+\func not-member (A : \Type) (elem : A) (l : List A) : \Type \elim l
+  | nil => \Sigma
+  | :: hd tl => \Sigma (Not (hd = elem)) (not-member A elem tl)
+
+\func unique-list (A : \Type) (l : List A) : \Type \elim l
+  | nil => \Sigma
+  | :: hd tl => \Sigma (not-member A hd tl) (unique-list A tl)
+\end{verbatim}
+
+Докажем, что список $[0,1,2]$ состоит из уникальных элементов:
+\begin{verbatim}
+\func r-unique => unique-list Nat (0 :: 1 :: 2 :: nil)
+\func x : r-unique => ((contradiction, (contradiction, ())), ((contradiction, ()), ((), ())))
+\end{verbatim}
+
+\begin{enumerate} 
+\item Напишите функцию, строящую список \verb!b! натуральных чисел от 0 до n и доказательство\\ \verb!unique-list Nat b!.
+\item Покажите, что если $a_0 < a_1 < \dots < a_n$, то список $[a_0,a_1,\dots,a_n]$ уникальный.
+\item Покажите, что если $n \ge 2$ и $a_k \ne a_{k+1}$ при $0 \le k < n$, то необязательно, что список
+$[a_0,a_1,\dots,a_n]$ --- уникальный.
+\end{enumerate}
+
+\item Как вы помните из лекции, в языке Аренд существует иерархия вложенных типовых универсумов. Если в типе отсутствует
+упоминание \verb!\Type!, то данный тип принадлежит универсуму 0. Однако, если в типе упоминается \verb!\Type k!,
+то тип принадлежит универсумам, не меньшим $k+1$. Уровень универума обозначается специальным ключевым словом \verb!\lp!.
+Над индексами можно проводить простые операции и сопоставление с образцом (\verb!\suc\lp!). Более подробно
+можно это прочесть в документации по языку Аренд:
+
+\url{https://arend-lang.github.io/documentation/tutorial/PartI/universes.html}
+%\begin{enumerate}
+%\item Определите функцию \verb!\id!, возвращающую 
+%\end{enumerate}
+
+Рассмотрим определения:
+\begin{verbatim}
+\func ChurchT (x : \Type) => (x -> x) -> (x -> x)
+\func Church => \Pi (x : \Type) -> ChurchT x
+\func Zero : Church => \lam t f x => x
+
+\func incT (t : \Type) (n : ChurchT t) => \lam f x => n f (f x)
+\func pair_plus (type : \Type) (pair : \Sigma (ChurchT type) (ChurchT type)) :
+  \Sigma (ChurchT type) (ChurchT type) => (pair.2, incT type pair.2)
+\func dec (n : Church) : Church => \lam (t : \Type) =>
+    (n (\Sigma (ChurchT t) (ChurchT t)) (pair_plus t) (Zero t, Zero t)).1
+\func sub (a : Church (\suc\lp)) (b : Church) => a (Church \lp) dec b
+\end{verbatim}
+
+Определите, развивая определения выше:
+\begin{enumerate}
+\item Операцию умножения.
+\item Операцию <<деление на три>> (естественно, в версии, не использующей $Y$-комбинатор).
+\item Операцию возведения в степень, определявшуюся как $\lambda m.\lambda n.n\ m$.
+\item Деление.
+\item Вычисление факториала.
+\end{enumerate}
+
+\item Введём тип данных \verb!IsEven!:
+
+\begin{verbatim}
+\data IsEven (n : Nat) \elim n
+  | 0 => zero-is-even
+  | (suc (suc k)) => next-next (IsEven k)
+\end{verbatim}
+
+Доказать, что этот тип является утверждением, можно например так:
+
+\begin{verbatim}
+\func all-even-different (n : Nat) (a b : IsEven n) : a = b \elim n, a, b
+  | 0, zero-is-even, zero-is-even => idp
+  | suc (suc n), next-next a, next-next b => pmap next-next (all-even-different n a b)
+
+\func is-even-isProp (n : Nat) : isProp (IsEven n) => all-even-different n
+\end{verbatim}
+
+Обратите внимание: по переменным $n$, $a$ и $b$ производится \emph{элиминация}, то есть множество 
+значений переменных разбивается на фрагменты (в соответствии с конструкторами типа данных), 
+и доказательство утверждения проводится независимо для каждого фрагмента; 
+в частности, цель доказательства изменяется и просходит замена переменных $a$ и $b$ на сопоставляемые
+варианты (вместо ожидаемого типа \verb!a = b! мы ожидаем тип \verb!zero-is-even = zero-is-even!, и т.п.).
+Сравните с лекцией про элиминаторы, каждый из вариантов --- тело отдельной функции-элиминатора. 
+
+Чтобы воспроизвести тот же эффект в конструкции \verb!\case!, нужно указывать ключевое слово 
+\verb!\elim! перед каждой элиминируемой переменной: 
+\begin{verbatim}
+\case \elim n, \elim a, \elim b \with { ... }
+\end{verbatim}
+
+Полный код, определяющий тип \verb!IsEven! (вместе с доказательством того, что тип --- утверждение),
+выглядит так:
+
+\begin{verbatim}
+\data IsEven (n : Nat) \elim n
+  | 0 => zero-is-even
+  | (suc (suc k)) => next-next (IsEven k)
+  \where {
+    \func all-even-different ... -- скопируйте код функции сюда
+    \use \level is-even-isProp (n : Nat) : isProp (IsEven n) => all-even-different n
+  }
+\end{verbatim}
+
+Однако, незавершённым остаётся доказательство разрешимости типа \verb!IsEven n!. Восполните лакуны:
+
+\begin{verbatim}
+\func even-is-dec (a : Nat) : Dec (IsEven a) \elim a
+  | 0 => yes zero-is-even
+  | 1 => no {?}
+  | suc (suc a) => {?}
+\end{verbatim}
+
+\item Справедливости ради, в предыдущем задании компилятор сам может догадаться, что \verb!IsEven! --- утверждение.
+Но далеко не для всех типов это очевидно, и тогда функция с префиксом \verb!\use \level! становится необходимой.
+Например, в следующем типе <<простое число>> данная функция должна доказать, что любые два значения типа при данном $x$ равны:
+
+\begin{verbatim}
+\data Div3 (x : Nat)
+  | remainder-zero (Exists (p : Nat) (p Nat.* 3 = x))
+  | remainder-one (Exists (p : Nat) (p Nat.* 3 Nat.+ 1 = x))
+  | remainder-two (Exists (p : Nat) (p Nat.* 3 Nat.+ 2 = x))
+  \where \use \level levelProp {x : Nat} (a b : Div3 x) : a = b => {?}
+\end{verbatim}
+
+\begin{enumerate}
+\item Замените \verb!{?}! в тексте выше на корректное доказательство.
+\item Определите функцию, которая бы по $x$ и значению $\exists p q.3 \cdot p + q = x \with 0 \le q < 3$ возвращала бы \verb!Div3 x!
+(понятно, можно разделить $x$ на 3, но нам уже результат деления дали вторым аргументом --- задача в том, чтобы им воспользоваться).
+\item Постройте аналогичный тип \verb!Prime x! для простых чисел --- с тремя вариантами \verb!less-than-two!, \verb!is-prime!, 
+\verb!is-composite! --- и определите функцию, строящую по числу значение данного типа.
+\item Покажите, что в типе \verb!Prime (x*x + 2*x + 1)! всегда (кроме граничных случаев) обитает вариант \verb!is-composite!.
+\item Покажите, что в типе 
+\begin{verbatim}
+\data SuperDec (P : \Prop)
+| sure P
+| nope (P -> Empty)
+| neither ((P || (P -> Empty)) -> Empty)
+\where \use \level superDecProp {P : \Prop} (a b : SuperDec P): a = b => {?}
+\end{verbatim}
+вариант \verb!neither! невозможен (также, заполните пропущенное доказательство \verb!superDecProp!).
+\end{enumerate}
+\end{enumerate}
+
+
+\section*{Домашнее задание №6: Алнебраическая топология}
+
+\begin{enumerate}
+\item Докажите, что $\mathbb{R}^2$ и $\mathbb{R}\times [0,+\infty)$ гомотопически эквивалентны, но не гомеоморфны.
+\item Докажите, что буквы \verb!O! и \verb!Q! гомотопически эквивалентны, но не гомеоморфны.
+\item Покажите, что для любых двух мощностей $\alpha$ и $\beta$ найдутся два гомотопически эквивалентных пространства $A, B$: $|A|=\alpha$,
+$|B|=\beta$.
+\item Покажите, что пространство $X$ линейно связно тогда и только тогда, когда любые отображения $\{0\} \rightarrow X$ гомотопны.
+\item Подсчитайте $\pi_1(S^2)$.
+\item Рассмотрим деревья с топологией <<открыты множества, содержащие вершины со всеми своими потомками>>. Поясните, какие деревья
+будут в такой топологии гомотопически эквивалентны.
+%\item Докажите, что \verb!(Bool = Bool) = Bool!.
+\end{enumerate}
+
+% написать absurd
+\section*{Домашнее задание №7: Аксиома выбора, теорема Диаконеску}
+\begin{enumerate}
+%\item Покажите (на метаязыке), что в ИИВ из закона исключённого третьего следует разрешимость (разумеется, не пользуясь разрешимостью ИИВ).
+%А также поясните, что из разрешимости следует закон исключённого третьего.
+\item Сформулируйте на языке Аренд аксиому выбора для \verb!\Set!-ов. Покажите, что она является теоремой.
+Покажите, что равенство для \verb!\Set!-ов разрешимо.
+\item Определите сетоиды в Аренде. Покажите, что целые числа образуют сетоид.
+\item Докажите теорему Диаконеску на Аренде с помощью сетоидов.
+%\item Поясните (на метаязыке) утверждение: <<аксиома выбора --- это аксиома о перестановке кванторов>>.
+\item С помощью аксиомы выбора на Аренде покажите, что любая сюрьективная функция из факторизованного множества (файл стандартной
+библиотеки \verb!Relation/Equivalence.ard!, тип данных \verb!Quotient!) в факторизованное имеет частичную обратную.
+И наоборот, покажите, что если любая сюрьективная функция из факторизованного множества (файл стандартной
+библиотеки\\ \verb!Relation/Equivalence.ard!, тип данных \verb!Quotient!) в факторизованное имеет частичную обратную, то выполнена аксиома выбора.
+\end{enumerate}
+
+
 \end{document}
