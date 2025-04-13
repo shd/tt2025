@@ -90,3 +90,47 @@ https://arend-lang.github.io/documentation/
 Institute for Advanced Study. 
 https://homotopytypetheory.org/book/
 + Хатчер А, Алгебраическая топология. Издательство МЦНМО, Москва, 2011
+
+## Лекция 6
+### Иерархии универсумов в Аренде
++ Prop и Set в Coq
++ Обобщение: гомотопическая иерархия в Аренде
++ Пропозициональное усечение
++ Сорта в языках с зависимыми типами, мотивация для сортов выше звёздочки
++ Парадокс Жирара (формулировка)
++ Предикативная иерархия
+### Где почитать
++ Документация по языку Coq
+https://coq.inria.fr/doc/V8.13.0/refman/addendum/extraction.html
++ Документация по языку Аренд
+https://arend-lang.github.io/documentation/
++ A.J.C. Hurkens, A Simplification of Girard's Paradox. 
+In: Dezani-Ciancaglini, M., Plotkin, G. (eds) Typed Lambda Calculi and Applications. 
+TLCA 1995. Lecture Notes in Computer Science, vol 902. Springer, Berlin, Heidelberg. 
+
+## Лекция 7
+### Алгебраическая топология
++ Гомеоморфизм, гомотопия, гомотопическая эквивалентность
++ Сферы, фундаментальная группа
++ Фундаментальная группа S^1
++ Фундаментальные группы в Аренде
++ Аксиома унивалентности
+### Где почитать
++ Документация по языку Аренд
+https://arend-lang.github.io/documentation/
++ Хатчер А, Алгебраическая топология. Издательство МЦНМО, Москва, 2011
++ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics. The Univalent Foundations Program
+Institute for Advanced Study. 
+https://homotopytypetheory.org/book/
+
+## Лекция 8
+### Аксиома выбора, сетоиды, теорема Диаконеску
++ Set не множество, доказуемость аксиомы выбора для Set-ов.
++ Сетоиды, теорема Диаконеску
++ Аксиома выбора в HoTT
++ Доказательство теоремы Диаконеску на Аренде
+### Где почитать
++ Стандартная библиотека языка Аренд
++ <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics. The Univalent Foundations Program
+Institute for Advanced Study. 
+https://homotopytypetheory.org/book/

@@ -1,0 +1,208 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{cmll}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Множества, Сетоиды, Теорема Диаконеску}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Set --- не множество}
+\begin{axiom}[выбора]Пусть задано семейство непустых множеств $A$
+($\forall a \in A.\exists y \in a$).
+Тогда найдётся функция, возвращающая по элементу из каждого множества
+($\exists f: A \rightarrow \cup A. f(a) \in a$).
+\end{axiom}
+
+Закодируем семейство с помощью отношения $R$: $R(a,b)$, если $b \in a$.
+
+\begin{verbatim}
+Theorem choice :
+ forall (A B : Type) (R : A->B->Prop),
+   (forall x : A, exists y : B, R x y) ->
+    exists f : A->B, (forall x : A, R x (f x)).
+\end{verbatim}
+
+К сожалению, \verb!choice! доказуем ($f$ определяется как значения, которые возвращает конструктивный квантор существования).
+\end{frame}
+
+\begin{frame}[fragile]{Сетоид}
+\begin{dfn}Сетоид --- сет с отношением эквивалентности\end{dfn}
+
+Такое определение делает равенство невычислимым.
+
+Почему аксиома выбора перестаёт быть доказуемой?
+Пусть $x \in A, y \in A, R(x,y)$. Но тогда должно быть $f(x) = f(y)$, хотя
+квантор может подсказывать разные значения
+($\exists p.R(x,p)$ и $\exists q.R(y,q)$ и $p \ne q$).
+\end{frame}
+
+\begin{frame}[fragile]{}
+\small
+\begin{verbatim}
+Reflx: {A : Type} -> (R: A -> A -> Type) -> Type
+Reflx {A} R = (x : A) -> R x x
+
+Symm: {A : Type} -> (R: A -> A -> Type) -> Type
+Symm {A} R = (x : A) -> (y : A) -> R x y -> R y x
+
+Trans: {A : Type} -> (R: A -> A -> Type) -> Type
+Trans {A} R = (x : A) -> (y : A) -> (z : A) -> R x y -> R y z -> R x z
+
+data IsEquivalence: {A : Type} -> (R: A -> A -> Type) -> Type where
+    EqProof: {A: Type} -> (R: A -> A -> Type) -> 
+       Reflx {A} R -> Symm {A} R -> Trans {A} R -> IsEquivalence {A} R
+
+record Setoid where
+    constructor MkSetoid
+    Carrier: Type
+    Equiv: Carrier -> Carrier -> Type
+    EquivProof: IsEquivalence Equiv
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{}
+\footnotesize
+\begin{verbatim}
+data Map: (A:Setoid) -> (B:Setoid) -> Type where
+  MkMap: {A:Setoid} -> {B:Setoid} -> (f: (Carrier A) -> (Carrier B)) -> 
+     ({x:Carrier A} -> {y:Carrier A} -> 
+     ((Equiv A) x y) -> ((Equiv B) (f x) (f y))) -> Map A B
+
+MapF: {A:Setoid} -> {B:Setoid} -> Map A B -> (Carrier A -> Carrier B)
+MapF (MkMap {A} {B} f ext) = f
+
+MapExt: {A:Setoid} -> {B:Setoid} -> (p: Map A B) -> 
+     ({x:Carrier A} -> {y:Carrier A} -> ((Equiv A) x y) -> ((Equiv B) (MapF p x) (MapF p y)))
+MapExt (MkMap {A} {B} f ext) = ext
+
+Rel: Type -> Type -> Type
+Rel a b = a -> b -> Type
+
+postulate ext_ac: {I: Setoid} -> {S: Setoid} -> 
+  (A: Rel (Carrier I) (Carrier S)) -> 
+  ((x: Carrier I) -> (g : Carrier S ** A x g)) ->
+  (chs: (Map I S) ** ((w: Carrier I) -> A w ((MapF chs) w)))
+
+excluded_middle: (P: Type) -> Or P (Not P)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Теорема Диаконеску}
+\begin{thm}Если рассмотреть ИИП с ZFC, то для любого $P$ выполнено $\vdash P \vee \neg P$.\end{thm}
+\begin{proof}Рассмотрим $\mathcal{B} = \{0,1\}$, $A_0 = \{ x \in \mathcal{B} | x = 0 \vee P \}$ и 
+$A_1 = \{ x \in \mathcal{B} | x = 1 \vee P\}$.
+$\{A_0,A_1\}$ --- семейство непустых множеств, и по акс. выбора существует
+$f: \{A_0,A_1\} \rightarrow \cup A_i$, что $f(A_i) \in A_i$. (Если $P$, то $A_0 = A_1$ и $\{A_0,A_1\} = \{\mathcal{B}\}$).
+
+\vspace{0.3cm}
+\begin{tabular}{ll}
+$\vdash f(A_0) \in A_0 \with f(A_1) \in A_1$ & а.выбора: $f(A_i) \in A_i$\\
+$\vdash {\color{olive}f(A_0) \in \mathcal{B}} \with (f(A_0) = 0 \vee P) \with {\color{olive}f(A_1) \in \mathcal{B}} \with (f(A_1) = 1 \vee P)$ & а.выделения\\
+%$\vdash(f(A_0) = 0 \vee P) \with (f(A_1) = 1 \vee P)$ & Удал. $(\with)$\\
+$\vdash (f(A_0) = 0 \with f(A_1) = 1) \vee P$ & Удал. $(\with)$ + дистр.\\
+$\vdash P\vee{\color{blue}f(A_0) \ne f(A_1)}$ & $0 \ne 1$ и транз.\\\pause
+$\vdash P \rightarrow A_0 = A_1$ & Определение $A_i$\\
+$\vdash A_0 = A_1 \rightarrow f(A_0) = f(A_1)$ & Конгруэнтность\\
+$\vdash \color{blue} f(A_0) \ne f(A_1) \rightarrow \neg P$ & Контрапозиция\\
+$\vdash P \vee \neg P$ & Подставили
+\end{tabular}
+\end{proof}
+\end{frame}
+
+\begin{frame}[fragile]{Аксиома выбора в HoTT}
+\begin{dfn}Обозначим пропозициональное усечение типа $T$ как $\| T\|$\end{dfn}
+%\begin{axiom}[выбора в HoTT]
+Рассмотрим $B: E \rightarrow \texttt{Set}$ --- некоторое семейство множеств.
+Заметим, что выражение $\Pi x^E.\| B x \|$ означает непустоту каждого элемента семейства.
+Тогда следующее выражение задаёт аксиому выбора:
+
+$$\Pi x^E.\| B x \| \rightarrow \| \Pi x^E.B x \|$$
+
+\begin{verbatim}
+\class Choice \extends BaseSet {
+  | choice {B : E -> \Set} : 
+       (\Pi (x : E) -> TruncP (B x)) -> TruncP (\Pi (x : E) -> B x)
+}
+\end{verbatim}
+%\end{axiom}
+\end{frame}
+
+\begin{frame}[fragile]{Теорема Диаконеску в Аренде}
+Вспомогательные определения:
+
+\begin{verbatim}
+\truncated \data Quotient {A : \Type} (R : A -> A -> \Type) : \Set
+\end{verbatim}
+
+Вспомним $A$ из теоремы Диаконеску:\\
+$A_0 := \{ x \in \mathcal{B} | x = 0 \vee P \}$, $A_1 := \{ x \in \mathcal{B} | x = 1 \vee P\}$.
+$A := \{A_0,A_1\}$
+%// --- семейство непустых множеств, и по акс. выбора существует
+
+$$R(x,y) := \left\{\begin{array}{ll}\text{И},&x = y\\
+                                    P,&x \ne y\end{array}\right.
+$$
+
+Иными словами, $A := \mathcal{B}/_R$, то есть \verb!Quotient {Bool} R!
+\end{frame}
+
+%\begin{frame}[fragile]{Аксиома выбора в Аренде}
+%Аксиома 
+%\begin{verbatim}
+%\axiom alem (P : \Prop) : Dec P
+%\end{verbatim}
+%\end{frame}
+
+\end{document}
