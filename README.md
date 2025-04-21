@@ -134,3 +134,17 @@ https://homotopytypetheory.org/book/
 + <<HoTT book>> Homotopy Type Theory: Univalent Foundations of Mathematics. The Univalent Foundations Program
 Institute for Advanced Study. 
 https://homotopytypetheory.org/book/
+
+## Лекция 9
+### Ещё о равенстве в Аренде, Парадокс Жирара
++ Эта-экспансия в Аренде
++ Фактор-множества в Аренде
++ Доказательство равенства всех экземпляров данного пропа в Аренде
++ Парадокс Бурали-Форти
++ Адаптация и упрощение парадокса: парадоксальные универсумы
++ Конструкции из U и U^-, позволяющие выразить упрощённый парадокс
++ Первая версия доказательства лжи в U^-
++ Мощные универсумы, дальнейшее упрощение парадокса
++ Вторая версия доказательтсва лжи
+### Где почитать
++ Antonius Hurkens, A Simplification of Girard's Paradox.
