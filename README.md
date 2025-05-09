@@ -158,3 +158,22 @@ https://homotopytypetheory.org/book/
 ### Где почитать
 + Philip Wadler. A taste of linear logic
 + Edsko de Vries, Rinus Plasmeijer, David M Abrahamson. Uniqueness Typing Simplified
+
+## Лекция 11
+### Подтипизация, формализация объектно-ориентированного программирования
++ Отношение подтипизации: определения
++ Система F<:
++ Объектно-ориентированное программирование с точки зрения теории типов
++ Примеры языков, использующих теорию типов для формализации подтипизации (Ocaml)
++ Комментарии о формальной реализации вывода типов в Ocaml
+### Где почитать
++ Martin Odersky, Philip Wadler. Pizza into Java: Translating theory into practice, ACM-SIGACT Symposium on Principles of Programming Languages, 1997
+https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=479c3fa1aabc119a5338bd6b46b0ac4dcbcf06d0
++ Radu Grigore. Java Generics are Turing Complete.
+https://arxiv.org/pdf/1605.05274
++ Nada Amin, Ross Tate. Java and Scala’s Type Systems are Unsound. OOPSLA'16.
+https://raw.githubusercontent.com/namin/unsound/master/doc/unsound-oopsla16.pdf
++ Формализация Scala (версия 3).
+Например, Fei Wang and Tiark Rompf. Towards Strong Normalization for Dependent Object Types (DOT). ECOOP'17.
+https://www.cs.purdue.edu/homes/rompf/papers/wang-ecoop17.pdf
+https://github.com/TiarkRompf/minidot?tab=readme-ov-file
