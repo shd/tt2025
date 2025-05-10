@@ -1,0 +1,191 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{cmll}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Проверка на модели (model checking)}
+\end{center}
+\end{frame}
+
+\begin{frame}{Общее введение}
+\begin{itemize}
+\item Проверить многопоточный алгоритм/протокол --- очень сложно.
+\item Перебрать, двоичные деревья --- комбинаторный взрыв. Нужен более содержательный подход.
+\item Проверка на моделях --- тоже по сути перебор, только очень хорошо оптимизированный.
+\item Первоначальная идея: Сlarke E., Emerson E., Sistla A., Automatic veriﬁcation of ﬁnite-state con-
+                                                            current systems using temporal logic speciﬁcations 
+%ACM Trans. Prog. Lang. and Systems, vol. 8, num. 2, p. 244–263, 
+1986.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Линейная темпоральная логика: операторы}
+\begin{itemize}
+\item Вариант моделей Крипке для модальной логики (интуиция из интуиционистской логики подходит).
+\item Миры выстроены в линейном порядке.
+\item В моделях Крипке для ИИВ (неявная) зависимость от миров была у импликации и отрицания.
+В ЛТЛ зависиость явная, и выражается с помощью следующих дополнительных связок:
+\begin{enumerate}
+\item $G(\alpha)$ или $\Box\alpha$: утверждение $\alpha$ выполнено в любой момент (начиная с текущего).
+\item $P(\alpha)$ или $\bigcirc\alpha$: утверждение $\alpha$ выполнено в следующий момент.
+\item $E(\alpha)$ или $\Diamond\alpha$: утверждение $\alpha$ неизбежно выполнено в будущем, в какой-то момент (начиная с текущего).
+\item $U(\alpha,\beta)$ или $\alpha\mathcal{U}\beta$: утверждение $\alpha$ истинно, пока $\alpha$ не станет истинным,
+после чего $\alpha$ может быть любым.
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Примеры выражений}
+\end{frame}
+
+\begin{frame}{Постановка задачи}
+\begin{dfn}Системой переходов назовём граф состояний, в котором каждое состояние отражает
+содержимое памяти компьютера, а переходы соответствуют инструкциям (операциям), выполняемым
+компьютером\end{dfn}
+
+Хотим научиться проверять, выполнено ли $\varphi$ при всех возможных вариантах выполнения программы,
+то есть при всех возможных путях в системе переходов $TS$:
+
+$$TS \models \varphi$$
+
+Можем понимать систему переходов как модель для логического исчисления.
+\end{frame}
+
+\begin{frame}{Автоматы Бюхи}
+\begin{itemize}
+\item Автоматы Бюхи отличаются от конечного автомата правилом проверки 
+допустимости строки:
+бесконечная строка $\alpha$ допускается конечным автоматом Бюхи, если в процессе применения
+автомата к ней допускающее состояние будет посещено бесконечное количество раз.
+
+\item
+Рассмотрим автомат с двумя состояниями (0,1) и полным графом переходов.
+
+Строка $(ab)^\omega$ будет принята, строка $a(b^\omega)$ --- нет.
+
+\item Можно рассматривать недетерминированные автоматы Бюхи.
+\item Обобщённые недетерменированные автоматы Бюхи --- такие, где есть список допускающих
+состояний, каждое из которых должно быть посещено бесконечное количество раз.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Представление моделей ЛТЛ как множества слов}
+Рассмотрим следующую грамматику для формул: $\varphi ::= \top\ |\ a\ |\ \varphi\with\varphi\ |\ \neg\varphi\ |\ \bigcirc\varphi\ |\ \varphi\mathcal{U}\varphi$
+
+Тогда:
+$$W(\varphi) = \{\sigma\in (\mathcal{P}(a))^\omega\ |\ \sigma\models\varphi \}$$
+На строке $\sigma = S_0S_1S_2\dots$ (каждый $S_i \subseteq \mathcal{P}(a)$) истинность задаётся так:
+$$\begin{array}{ll}
+\sigma\models\top & \text{всегда}\\
+\sigma\models a & a \in S_0\\
+\sigma\models \varphi_1 \with \varphi_2 & \sigma\models\varphi_1 \text{ и } \sigma\models\varphi_2\\
+\sigma\models\neg\varphi & \sigma\not\models\varphi\\
+\sigma\models\bigcirc\varphi & \sigma[1\dots]\models\varphi\\
+\sigma\models\varphi_1\mathcal{U}\varphi_2 & \text{ существует }j.\sigma[j\dots]\models\varphi_2 \text{ и } \sigma[i\dots]\models\varphi_1, i < j
+\end{array}$$
+\end{frame}
+
+\begin{frame}{Разрешимость задачи $TS \models \varphi$ в ЛТЛ}
+\begin{thm}Если система переходов конечна и не содержит терминальных состояний, то
+существует алгоритм, разрешающий данную задачу для любого $\varphi$. В случае отрицательного
+ответа алгоритм строит контрпример.
+\end{thm}
+
+\begin{proof}Построим недетерменированный автомат Бюхи по системе переходов для формулы $\neg\varphi$
+(принимает строку тогда и только тогда, когда она удовлетворяет формуле), затем по автомату построим
+удовлетворяющую строку, если она существует.
+\end{proof}
+\end{frame}
+
+\begin{frame}{Пример реализации: SPIN}
+\begin{itemize}
+\item Один из первых инструментов (1991 год).
+\item Используется специальный язык для описания алгоритмов/протоколов (Promela).
+\item Язык позволяет формализовать параллельные вычисления.
+\item Программа может быть вычислена в разных окружениях (например, случайное исполнение).
+\item Также, к программе могут быть добавлены условия, которые либо будут доказаны --- либо
+будет найден контрпример (контрпример будет предъявлен).
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Пример программы на Promela: каковы возможные значения n?}
+\begin{verbatim}
+byte n = 0, ﬁnish = 0;
+active [2] proctype P() {
+    byte register, counter = 0;
+    do :: counter = 10 -> break
+       :: else ->
+             register = n;
+             register++;
+             n = register;
+             counter++
+    od;
+    ﬁnish++
+}
+active proctype WaitForFinish() {
+    ﬁnish == 2;
+    printf(“n = %d\n”, n)
+}
+\end{verbatim}
+\end{frame}
+
+%\begin{frame}{Сколько возможно ответов?}
+%\begin{itemize}
+%\pause\item На самом деле два.
+%\end{itemize}
+%\end{frame}
+%\begin{frame}{}
+%\end{frame}
+
+\end{document}
