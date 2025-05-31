@@ -177,3 +177,32 @@ https://raw.githubusercontent.com/namin/unsound/master/doc/unsound-oopsla16.pdf
 Например, Fei Wang and Tiark Rompf. Towards Strong Normalization for Dependent Object Types (DOT). ECOOP'17.
 https://www.cs.purdue.edu/homes/rompf/papers/wang-ecoop17.pdf
 https://github.com/TiarkRompf/minidot?tab=readme-ov-file
+
+## Лекция 12
+### Проверка на моделях (model checking)
++ Постановка задачи
++ Линейная темпоральная логика
++ Пример простой программы со сложной логикой
++ Примеры реализации, язык SPIN
+### Где почитать
++ Mordechai (Moti) Ben-Ari. A Primer on Model Checking
+https://spinroot.com/spin/Doc/p40-ben-ari.pdf
++ Christel Baier and Joost-Pieter Katoen. Principles of Model Checking
+https://is.ifmo.ru/books/_principles_of_model_checking.pdf
+
+## Лекция 13
+### Категорная абстрактная машина
++ Постановка задачи: зачем такая машина нужна, связь с комбинаторами
++ Общая формальная идея
++ Конкретная реализация
+### Где почитать
++ V.E. Wolfengagen. Combinatory Logic in Programming (глава 21).
++ G. Cousineau, P.-L. Curien, M. Mauny. The Categorical Abstract Machine.
+
+## Лекция 14
+### Неразеримость системы F
++ Задачи проверки типов и реконструкции типов. Разрешимость для просто типизированного лямбда-исчисления.
++ Задача полуунификации, её неразрешимость
++ Сведение проверки типов в F по Карри к полуунификации.
+### Где почитать
++ J. B. Wells. Typability and Type Checking in the Second-Order Lambda-Calculus Are Equivalent and Undecidable.

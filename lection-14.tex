@@ -1,0 +1,242 @@
+\documentclass[aspectratio=169,dvipsnames,usenames]{beamer}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{verbatim}
+\usepackage{amsthm}
+%\usepackage{bnf}
+\usepackage{cmll}
+\usepackage{tikz}
+\usepackage{enumerate}
+\usepackage{mathtext}
+\usepackage{mathtools}
+\usepackage{mathabx}
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+%\usepackage{paracol}
+%\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+%\usepackage{minted}
+%\usepackage{hyperref}
+\setbeamertemplate{navigation symbols}{}
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{automata,positioning}
+\usepackage{float}
+
+\begin{document}
+
+%\theoremstyle{dfn}
+\newtheorem{dfn}{Определение}[section]
+\newtheorem{nte}{Замечание}[section]
+
+\newtheorem{axiom}{Аксиома}[section]
+\newtheorem{thm}{Теорема}[section]
+\newtheorem{lmm}[theorem]{Лемма}
+\newtheorem{statement}{Утверждение}[section]
+\newtheorem{oun_paragraph}{Пункт}[section]
+\newtheorem{cons}{Следствие}[section]
+\newtheorem*{exm}{Пример}
+
+\newcommand{\comb}[1]{\operatorname{\mathcal{#1}}}
+\newcommand{\func}[1]{\operatorname{#1}}
+\newcommand{\reduction}[1]{{\color{OrangeRed}#1}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+
+\def\from#1{\par \parbox{0.7\textwidth}{\par \hfill\raggedleft \it #1}} 
+
+\begin{frame}{}
+\begin{center}
+{\LARGE Неразрешимость системы F}
+\end{center}
+\end{frame}
+
+\begin{frame}{Разрешимость типизации $\lambda_\rightarrow$}
+\begin{itemize}
+\item Алгебраические термы: $T ::= V\ |\ f\ T\ \dots\ T$,
+\item Уравнение в алгебраических термах $\sigma = \sigma'$
+\item Подстановка переменной: функция $S_0: V \rightarrow T$, тожественная почти везде.
+\item Подстановка: $S: T \rightarrow T$, что $S(v) = S_0(v)$ и 
+$S(f\ \theta_1\ \dots\ \theta_n) = f\ S(\theta_1)\ \dots\ S(\theta_n)$
+\item Решение задачи унификации --- такая $S$, что $S(\sigma) = S(\sigma')$.
+\item Задача типизации: по лямбда-выражению строим уравнение, находим решение, по решению строим тип.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Система F}
+$$\infer[\text{(Акс.)}]{\Gamma,x:\sigma\vdash x:\sigma}{}$$
+$$\infer[\text{(Прим.)}]{\Gamma\vdash(M\ N):\tau}{\Gamma\vdash M:\sigma\rightarrow\tau\quad \Gamma\vdash N:\sigma}$$
+$$\infer[\text{(Абстр.)}]{\Gamma\vdash(\lambda x.M):\sigma\rightarrow\tau}{\Gamma,x:\sigma\vdash M:\tau}$$
+$$\infer[\text{(Спец.)}]{\Gamma\vdash M:(\sigma[\alpha:=\tau])}{\Gamma\vdash M:\forall\alpha.\sigma}$$
+$$\infer[\text{(Обобщ.)}]{\Gamma\vdash M:\forall\alpha.\sigma}{\Gamma\vdash M:\sigma}$$
+
+\begin{dfn}
+Вывод --- записанное в виде списка дерево. 
+То есть, конечная последовательность формул (секвентов) $\Delta_1,\dots,\Delta_n$ 
+(вида $\Gamma\vdash M:\sigma$), где каждый $\Delta_i$ --- результат применения 
+какого-то из правил к посылкам $\Delta_j$ (и возможно $\Delta_k$), где $j,k < i$.
+\end{dfn}
+\end{frame}
+
+\begin{frame}{Специализация перед обобщением}
+\begin{dfn}
+Пусть для доказательства $\Delta_i$ определена функция $c(i)$
+(<<номер заключения для посылки $i$>>), при этом все правила в выводе
+имеют вид $$\infer[(\text{также }c(i)=c(j))]{\Delta_{c(i)}}{\Delta_i\quad\quad\Delta_j}\quad\quad\infer{\Delta_{c(i)}}{\Delta_i}$$
+
+В доказательстве \emph{специализации идут перед обобщениями}, {\bfseries если для любой}
+подпоследовательности $\Delta_{m_1},\dots,\Delta_{m_j}$, такой,
+что:\begin{enumerate}
+\item $m_i = c(m_{i-1})$;
+\item $\Delta_{m_1}$ --- заключение аксиомы, правил применения и абстракции;
+\item $\Delta_{m_2},\dots,\Delta_{m_j}$ --- заключения правил обобщения и специализации;
+\end{enumerate}
+
+{\bfseries выполнено:} существует $1 \leq k \leq j$, что $\Delta_{m_2},\dots,\Delta_{m_k}$ --- 
+заключения правил специализации, а $\Delta_{m_{k+1}},\dots,\Delta_{m_j}$ --- правил обобщения.
+\end{dfn}
+\end{frame}
+
+\begin{frame}{Полуунификация}
+Язык термов: $\mathcal{T} ::= V | \mathcal{T}\rightarrow\mathcal{T}$.
+
+\begin{dfn}Решением задачи полуунификации для $\{\tau_1 \leq \mu_1, \tau_2 \leq \mu_2\}$
+при $\tau_1,\tau_2,\mu_1,\mu_2\in\mathcal{T}$ будет
+$S: \mathcal{T}\rightarrow\mathcal{T}$, что для неё существуют $S_1$ и $S_2$, что $S_1(S(\tau_1)) = S(\mu_1)$ и 
+$S_2(S(\tau_2)) = S(\mu_2)$.\end{dfn}
+
+\begin{thm}Задача полуунификации для $\{\tau_1 \leq \mu_1, \tau_2 \leq \mu_2\}$ неразрешима\end{thm}
+Без доказательства.
+\end{frame}
+
+\begin{frame}{Сведение полуунификации к проверке типов}
+\begin{thm}Разрешимость задачи проверки типов для $F$ эквивалентна разрешимости
+полуунификции для $\{\tau_1 \leq \mu_1, \tau_2 \leq \mu_2\}$ при $\tau_1,\tau_2,\mu_1,\mu_2\in\mathcal{T}$.
+\end{thm}
+\begin{proof}
+Пусть даны $\tau_1,\tau_2,\mu_1,\mu_2$ со свободными переменными $\alpha_1,\dots,\alpha_n$.
+Рассмотрим контекст:
+$$\Gamma := \{ b:\forall\beta\gamma.(\gamma\rightarrow\gamma)\rightarrow\beta,\ \ 
+             c:\forall\alpha_1\dots\alpha_n\delta_1\delta_2.(\mu_1\rightarrow\delta_1)\rightarrow(\delta_2\rightarrow\mu_2)\rightarrow(\tau_1\rightarrow\tau_2) \}$$
+И построим формулу:
+$$\Gamma\vdash (b\ (\lambda x.c\ x\ x)) : \beta$$
+
+\begin{itemize}
+\item Решение задачи полуунификации даёт доказуемость формулы в $F$.
+\item Наличие доказательства формулы в $F$ позволяет решить задачу полуунификации.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}{По решению строим доказательство}
+Предположим, есть $S, S_1, S_2$, что $S_1(S(\tau_1))=S(\mu_1)$ и $S_2(S(\tau_2))=S(\mu_2)$.
+Рассмотрим $\Gamma' := \Gamma,\ x:\forall.S(\tau_1)\rightarrow S(\tau_2)$.
+
+{\color{gray} $\Gamma := \{ b:\forall\beta\gamma.(\gamma\rightarrow\gamma)\rightarrow\beta,\ \ 
+             c:\forall\alpha_1\dots\alpha_n\delta_1\delta_2.(\mu_1\rightarrow\delta_1)\rightarrow(\delta_2\rightarrow\mu_2)\rightarrow(\tau_1\rightarrow\tau_2) \}$}
+
+\vspace{0.1cm}
+Тогда легко построить вывод следующих формул, применив правила подстановки:
+\begin{tabular}{ll}
+(1) & $\Gamma' \vdash c : (S(\mu_1)\rightarrow S_1(S(\tau_2)))\rightarrow (S_2(S(\tau_1))\rightarrow S(\mu_2))
+                    \rightarrow (S(\tau_1)\rightarrow S(\tau_2))$\\
+(2) & $\Gamma' \vdash x : S_1(S(\tau_1)) \rightarrow S_1(S(\tau_2))$\\
+(3) & $\Gamma' \vdash x : S_2(S(\tau_1)) \rightarrow S_2(S(\tau_2))$
+\end{tabular}
+
+\vspace{0.1cm}
+Воспользуемся полуунификацией: $S(\mu_1)=S_1(S(\tau_1))$ и $S(\mu_2)=S_2(S(\tau_2))$
+
+\begin{tabular}{ll}
+(4) & $\Gamma' \vdash cx : (S_2(S(\tau_1))\rightarrow S(\mu_2)) \rightarrow (S(\tau_1)\rightarrow S(\tau_2))$\\
+(5) & $\Gamma' \vdash cxx : S(\tau_1)\rightarrow S(\tau_2)$
+\end{tabular}
+
+\vspace{0.1cm}
+$\beta$ --- связанная, потому можем гарантировать $S(\beta)=\beta$, $S_1(\beta)=\beta$, $S_2(\beta)=\beta$.
+
+\begin{tabular}{ll}
+(6) & $\Gamma' \vdash cxx : \forall . S(\tau_1) \rightarrow S(\tau_2)$\\
+(7) & $\Gamma \vdash \lambda x.cxx : (\forall . S(\tau_1)\rightarrow S(\tau_2)) \rightarrow (\forall.S(\tau_1)\rightarrow S(\tau_2))$\\
+(8) & $\Gamma \vdash b : ((\forall . S(\tau_1)\rightarrow S(\tau_2)) \rightarrow (\forall.S(\tau_1)\rightarrow S(\tau_2))) \rightarrow \beta$\\
+(9) & $\Gamma \vdash b\ (\lambda x.cxx) : \beta$
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{По доказательству строим решение}
+
+{\color{gray} $\Gamma := \{ b:\forall\beta\gamma.(\gamma\rightarrow\gamma)\rightarrow\beta,\ \ 
+             c:\forall\alpha_1\dots\alpha_n\delta_1\delta_2.(\mu_1\rightarrow\delta_1)\rightarrow(\delta_2\rightarrow\mu_2)\rightarrow(\tau_1\rightarrow\tau_2) \}$}
+Пусть доказуемо $\Gamma\vdash b\ (\lambda x.cxx) : \beta$. В формуле нет редексов, 
+потому каждой конструкции должно соответствовать применение соответствующего правила.
+
+\vspace{0.1cm}
+Ветка, определяющая тип $\lambda x.cxx$:
+\begin{tabular}{l}
+$\Gamma,x:\sigma \vdash c : (T(\mu_1)\rightarrow T(\delta_1))\rightarrow(T(\delta_2)\rightarrow T(\mu_2))\rightarrow(T(\tau_1)\rightarrow T(\tau_2))$\\
+$\Gamma,x:\sigma \vdash x : T(\mu_1)\rightarrow T(\delta_1)$\\
+$\Gamma,x:\sigma \vdash cx : (T(\delta_2)\rightarrow T(\mu_2))\rightarrow(T(\tau_1)\rightarrow T(\tau_2))$\\
+$\Gamma,x:\sigma \vdash x : T(\delta_2)\rightarrow T(\mu_2)$\\
+$\Gamma,x:\sigma \vdash cxx : T(\tau_1)\rightarrow T(\tau_2)$\\
+$\Gamma,x:\sigma \vdash cxx : \forall.T(\tau_1)\rightarrow T(\tau_2)$\\
+$\Gamma\vdash \lambda x.cxx : \sigma \rightarrow \forall.T(\tau_1)\rightarrow T(\tau_2)$
+\end{tabular}
+
+\vspace{0.1cm}
+Также, вывод типа $b$ должен оканчиваться на такую формулу:
+\begin{tabular}{l}
+$\Gamma\vdash b : (\varphi\rightarrow\varphi)\rightarrow\beta$
+\end{tabular}
+
+\vspace{0.1cm}
+Типизация $b(\lambda x.cxx)$ возможна только при помощи правила для применения:
+\begin{tabular}{l}
+$\Gamma\vdash b(\lambda x.cxx):\beta$
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Анализ доказательства}
+Правило для вывода типа $b(\lambda x.cxx)$
+$$
+\infer{\Gamma\vdash b(\lambda x.cxx):\beta}{\Gamma\vdash b : (\varphi\rightarrow\varphi)\rightarrow\beta\quad\quad\Gamma\vdash \lambda x.cxx : \sigma \rightarrow \forall.T(\tau_1)\rightarrow T(\tau_2)}
+$$
+даёт $\varphi=\sigma=\forall.T(\tau_1)\rightarrow T(\tau_2)$
+
+\vspace{0.1cm}
+Анализируя же правила типизации $x$:
+
+$$\infer{\Gamma,x:\sigma \vdash x : T(\mu_1)\rightarrow T(\delta_1)}{}\quad
+\infer{\Gamma,x:\sigma \vdash x : T(\delta_2)\rightarrow T(\mu_2)}{}$$
+
+
+получим четыре равенства:
+
+$T_1(T(\tau_1))=T(\mu_1), T_2(T(\tau_1))=T(\delta_2), 
+  T_1(T(\tau_2))=T(\delta_1), T_2(T(\tau_2))=T(\mu_2)$
+
+%И закончим построение подстановки путём определения функции стирания:
+
+$$|\sigma|=\left\{\begin{array}{ll}\alpha,&\sigma=\alpha\\
+    |\tau_1|\rightarrow|\tau_2|,&\sigma=\tau_1\rightarrow\tau_2\\
+    |\tau|,&\sigma=\forall \alpha.\tau\end{array}\right.$$
+
+$S_k(\alpha_k) = |T_k(\alpha_k)|$, и $S_k(\varepsilon)=\varepsilon$ для других переменных.
+
+\end{frame}
+
+\begin{frame}{Дополнительные факты}
+\begin{itemize}
+\item Задача проверки типов для $F$ эквивалентна задаче нахождения типов.
+\item Другие методы доказательства: например, унификация второго порядка.
+\end{itemize}
+\end{frame}
+
+\end{document}
