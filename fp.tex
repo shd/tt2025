@@ -1,0 +1,342 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{cmll}
+\usepackage{xcolor}
+\usepackage{proof}
+\setbeamertemplate{navigation symbols}{}
+%\usetheme{Warsaw}
+\begin{document}
+
+\newtheorem{axiom}{Аксиома}
+\newtheorem{exmprus}{Пример}
+\newtheorem{defrus}{Определение}
+\newtheorem{lemmarus}{Лемма}
+\newtheorem{thmrus}{Лемма}
+
+\begin{frame}{}
+\begin{center}{\Large О функциональном программировании}\\\itshape{ИТМО, 5 сентября 2025 года}\end{center}
+\end{frame}
+
+\begin{frame}{История вопроса}
+\begin{itemize}
+\item Моисей Шейнфинкель, кобминаторы, 1924.
+
+\item Алонзо Чёрч (конец 1920х --- начало 1930х), лямбда-исчисление: попытка построить логику,
+в которой вызов функции --- основание языка.
+Парадоксы, добавление типов, просто типизированное лямбда исчисление.
+
+\item Помните? $2 := \lambda f.\lambda x.f\ (f\ x)$, и тогда $2\ 2 =_\beta 4$
+
+\item Просто-типизированное лямбда исчисление (1940):
+ $$\lambda f.\lambda x.f\ (f\ x): (\alpha\rightarrow\alpha) \rightarrow (\alpha\rightarrow\alpha)$$
+
+\item Отсюда изоморфизм Карри-Ховарда:
+\begin{tabular}{ll}
+$\lambda$-исчисление & логическое исчисление\\\hline
+Лямбда выражение & доказательство\\
+Тип выражения & высказывание
+\end{tabular}
+
+То есть, $\lambda x.x$ доказывает то, что $\alpha\rightarrow\alpha$.
+
+\item Имея формальный алгоритм (лямбда исчисление) и математический фундамент для него,
+большое искушение --- построить язык программирования на этой основе.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Динамически и статически типизированные функциональные языки}
+\begin{itemize}
+\item Lisp --- один из первых языков высокого уровня (1958), динамическая типизация.
+
+\item Типовая система Хиндли-Милнера (разрешимая часть интуиционистского ИП 2 порядка) и язык ML (``Meta Language''). Исходно --- для написания тактик
+
+\item Xavier Leroy, ``Top-level loop considered harmful''.
+Программа живёт в некотором мире (привет, Jupyter Notebook, также промпты-транскрипты), из него можно что-то экстрактировать
+--- против программы, записанной в текстовом файле в законченном виде.
+
+\item Caml (Язык категорной абстрактной машины)
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Прежде чем скажем, что такое Ф.П.: а что такое функция?}
+\begin{itemize}
+\item Определение 1: выделенная часть программы, с соответствующим интерфейсом (подробности опущены).
+
+\item Определение 2: математическое определение:
+$$\langle D, C, \Gamma\rangle, \text{ где }
+  \Gamma\subseteq D \times C,\quad\quad
+  \forall d, c_1, c_2.\langle d,c_1\rangle \in \Gamma \with \langle d,c_2\rangle \in \Gamma\rightarrow c_1=c_2$$
+Скажем, возведение в квадрат: $\langle\mathbb{R},\mathbb{R},\{\langle p,p^2 \rangle\ |\ p\in\mathbb{R}\}\rangle$
+
+\item Функции в смысле 1, которые соответствуют определению 2 --- ``чистые'':
+\verb!int sq(int x) { return x*x; }!
+
+\item Функции в смысле 1, которые не соответствуют определению 2 --- ``с побочным эффектом'':
+\begin{verbatim}
+int seq_no = 0;
+int get_seq_no() { return seq_no++; }
+printf("Hello, world!\n");     // Изменяет мир
+scanf("%d", &v);               // Также изменяет мир
+\end{verbatim}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Что такое функциональные языки (некоторые общие соображения)}
+\begin{itemize}
+\item Функции в Ф.Я. --- значения первого (высшего?) сорта (``first class values''),
+то есть полноценные значения. Например, функцию возможно задать, не указывая имени: $\lambda x.x^2$.
+Это базовый критерий, но есть и дополнительные.
+
+\item Дизайн языка --- как правильно ограничить несущественное, чтобы получить важное.
+Функциональные языки часто предполагают запрет (сильное ограничение) на разрушающее присваивание и побочные эффекты.
+
+\item Что это даёт:
+\begin{itemize}
+\item ``Прозрачность по ссылкам'' --- ссылка на разделяемый объект неотличима от ссылки на его копию.
+\item Возможность для ленивых вычислений/оптимизаций/предсказуемость поведения.
+\end{itemize}
+\item Кроме того, дополнительные характерные возможности, реализация которых облегчается
+(но которые встречаются и в других языках):\begin{itemize}
+\item Алгебраические типы, сопоставление с образцом, списки, функции высших порядков --- базовые конструкции языка.
+\item Формализация типовой системы как логического исчисления.
+\item Автоматическая сборка мусора.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Haskell}
+Haskell (в честь Хаскеля Карри), сперва Miranda/Hope (David Turner), Haskell 98:
+
+\begin{itemize}
+\item Типовая система Хиндли-Милнера
+
+\item Прозрачность по ссылкам, запрет разрушающего присваивания и ограничение побочных эффектов.
+
+\item Исключения запрещены --- хотя впервые появились как раз в Caml, как функциональный goto. 
+
+\item Форматирование как синтаксическая конструкция.
+
+\item Ленивые вычисления.
+
+\item Функции высших порядков, list comprehensions и т.п.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Типовая система}
+Изоморфизм Карри-Ховарда: тип (в лямбда исчислении) --- логическое выражение в некотором исчислении.
+То есть, тип данной функции:
+\begin{center}
+\verb!compose f g = \x -> f (g x)!
+\end{center}
+
+Соответствует некоторому логическому утверждению:
+$$\texttt{compose}: \forall \alpha.\forall \beta.\forall \gamma.(\beta\rightarrow\gamma)\rightarrow(\alpha\rightarrow\beta)\rightarrow(\alpha\rightarrow\gamma)$$
+
+Зачем? 1. упрощение разработки компилятора; 2. регулярность (отсюда: выразительная сила языка).
+\end{frame}
+
+\begin{frame}[fragile]{Запрет на разрушающее присваивание}
+\begin{itemize}
+\item Однократное можно: \verb!let x = 5 in x * x!
+\item Как переписать код в таком стиле поясним на примере:
+\begin{verbatim}
+def fib(n):
+    a = 1
+    b = 1
+    for id in range(n):
+        (a,b) = (a+b,a)
+    return b 
+\end{verbatim}
+\item Перепишем это с использованием рекурсии:
+\begin{verbatim}
+fib' a b n = 
+    if n > 0 
+        then fib' (a+b) a (n-1)
+        else b
+
+fib n = fib' 1 1 n
+\end{verbatim}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Синтаксически значимое форматирование}
+Известно ещё 60х годов. Фортран: первые пять позиций перфокарты --- для метки. Позиции с 7 по 72 ---
+текст оператора, с 73 --- комментарий.
+
+Зачем: отлаживали?
+
+\begin{verbatim}
+if (x >= 0)
+   printf("x >= 0");
+else
+   printf("clearing negative x");
+   x = 0;
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{Ленивые вычисления}
+\begin{itemize}
+\item На теоретическом уровне: Normal reduction order для лямбда-выражений
+\item Ближе к реализации: СЗНФ, ``не вычисляем значение, если оно не нужно''
+\item \verb!LazyValue V = Just V | Closure (() -> V)!
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Функции часто возможно задать при помощи ряда: $f(x) = \sum_n a_n \cdot x^n$}
+\footnotesize
+\begin{verbatim}
+series f = f : repeat 0                 -- [f,0,0,0,..], т.е. f = f + 0*x + 0*x^2 + ...
+summ x [] = 0
+summ x (p0:ps) = p0 + x * summ x ps
+
+instance (Num a, Eq a) => Num [a] where
+   fromInteger c = series(fromInteger c)
+   negate (f:ft) = -f : -ft
+   (f:ft) + (g:gt) = f+g : ft+gt
+
+instance (Fractional a, Eq a) => Fractional [a] where
+   (f:ft) / (g:gt) = qs where qs = f/g : series(1/g)*(ft-qs*gt)
+
+integral fs = 0 : zipWith (/) fs [1..]  -- p1+p2*x+... = (c+p1*x/1+p2*x^2/2+...)'
+
+sin_s = integral cos_s
+cos_s = 1 - integral sin_s
+
+main = do print $ (fromRational $ summ (3.1415926/4) $ take 15 sin_s :: Double)
+\end{verbatim}
+\url{https://www.cs.dartmouth.edu/~doug/powser.html}
+\end{frame}
+
+\begin{frame}[fragile]{Применение ленивых вычислений}
+\begin{itemize}
+\item Заметим, что if всегда ленив: \verb!let fact n = if n > 0 then fact (n-1)*n else 1!
+\item Конструкции весьма распространены: например, \verb!&&! и \verb!||!, также \verb!unwrap_or! против \verb!unwrap_or_else!
+\item Отлаживали непонятную потерю производительности?
+\begin{verbatim}
+fn debug(s: String) {
+    if errorlevel <= DEBUG { println!("DEBUG: {}", s); }
+}
+debug(format!("Nice info: {}", complicated_computation()));
+\end{verbatim}
+\item Cредство модульности:
+\begin{verbatim}
+txt = read_json_file()
+l = parse_structure(txt)
+parse_integer(l!!1)
+\end{verbatim}
+
+Если всё правильно сделано, функции не прочтут (и не разберут) лишнего.
+\item Оптимизация: ленивое соединение списков имеет сложность $O(1)$.
+\end{itemize}
+\end{frame}
+
+%\begin{frame}{Зачем эти конструкции?}
+%\item выразительная сила языка.
+%Что это?
+%* покойный А.Н.Терехов любил повторять: модуль это "вот столько".
+%Столько, сколько вы можете охватить взглядом. Столько, сколько помещается в голове за раз.
+%Чем выразительней язык, тем больше кода получается охватить взглядом, без погружения в ненужные
+%детали.
+%* всякие странные конструкции
+%\end{frame}
+
+\begin{frame}[fragile]{Чисто функциональные структуры данных: очередь}
+\begin{itemize}
+\item А что с обычными структурами (массивы, очереди, ...)?
+ Chris Okasaki, ``Purely functional data structures''
+
+\item Циклический массив? С переотведением памяти?
+\begin{verbatim}
+X array [SIZE];
+int wr, rd;
+void push (X x) { array[wr] = x; wr = (wr+1) % SIZE; }
+X& take() { X& tmp = &array[rd]; rd = (rd+1) % SIZE; return tmp; }
+\end{verbatim}
+
+\item Двусвязный список? 
+
+Везде нужно исправлять значения (прозрачности по ссылкам нет), всё дорогое...
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Чисто функциональная реализация очереди}
+\small
+\begin{verbatim}
+data Queue a = Queue ([a], [a])       -- входной и выходной списки
+
+push :: a -> Queue a -> Queue a
+push last (Queue (qi, qo))  = Queue (last : qi, qo)
+
+take :: Queue a -> (Maybe a, Queue a)
+take (Queue ([], []))       = (Nothing, Queue ([], []))
+take (Queue (qi, fst : qo)) = (Just fst, Queue (qi, qo))
+take (Queue (qi, []))       = take (Queue ([], rev qi))
+\end{verbatim}
+
+\normalsize
+\emph{Средняя} сложность --- $\Omega(1)$ (получается не для всех структур, бывает $\Omega(\log n)$).
+При этом очередь (почти) бесплатно копируется и прозрачна по ссылкам:
+
+\small
+\begin{verbatim}
+u = push (1, Queue([],[]))
+(x,u') = take u
+-- тут существуют и u, и u'
+\end{verbatim}
+\normalsize
+В этом решении есть свои сложности: многократное использование \verb!u! означает 
+многократное обращение списка. Если предполагается частое копирование очереди,
+может потребоваться более сложная реализация.
+\end{frame}
+
+\begin{frame}{Применение вне Хаскеля}
+В любой ситуации, где сложности с разрушающим присваиванием
+(например, многопоточное окружение: Lock-free data structures).
+
+Мы не изменяем структуру данных, только что-то достраиваем вокруг (ну и собираем мусор
+при необходимости), а потом меняем дешёвую или вообще атомарную ссылку на корень структуры.
+\end{frame}
+
+\begin{frame}{Дальнейшее развитие}
+\begin{itemize}
+\item Хаскель и ФП в целом послужили базой (источником вдохновения) для многих других языков.
+\item Близкие проекты (Clean, линейные типы данных)
+
+\item Усложнение идеи (ещё более сложные логические теории, используемые в качестве логической 
+основы языка): 
+\begin{itemize}
+\item языки для формализации математических доказательств на основании изоморфизма Карри-Ховарада:\\
+Ocaml --- в Coq \\
+Haskell --- в Agda \\
+Отдельно Lean, Arend
+\item языки с зависимыми типами (например, Идрис)
+\end{itemize}
+
+\item Выделение отдельных полезных/удобных конструкций, при этом сохранение общего стиля
+императивных/объектно-ориентированных языков.
+\begin{itemize}
+\item Питон: генераторы, работа со списками, форматирование
+
+\item Раст
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Раст}
+Раст подходит ко многим идеям из Ф.П. с практической точки зрения
+(частное удобное полезное применение лучше общего сложного механизма):
+\begin{itemize}
+\item Автоматическое управление памятью через подсчёт ссылок (autoptr/Rust).
+Метод идейно проще, но менее эффективен.
+\item Итераторы как (нехранимые) списки --- контролируемые пользователем оптимизации, реализуемые в Хаскеле
+через общий механизм дефорестации и ленивых вычислений.
+\item Контроль владения (императивная версия прозрачности по ссылкам --- компилятор даёт некоторые гарантии
+по поводу значений).
+\item Типовая система --- попытка широко использовать вывод типов, хотя система не имеет чёткой формализации.
+\item Алгебраические типы, сопоставление с образцом.
+\end{itemize}
+\end{frame}
+\end{document}
